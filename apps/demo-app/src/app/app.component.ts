@@ -13,6 +13,7 @@ import { AuthService } from '@platform/auth';
 import { InactivityService } from '@platform/core';
 import { ConfirmService, AlertService, ToastService, SpinnerService, ToastType } from '@platform/ui-feedback';
 import { TrackerService } from '@platform/observability';
+import { TestApiService, Post } from './test/test-api.service';
 
 @Component({
   selector: 'app-root',
@@ -128,7 +129,29 @@ import { TrackerService } from '@platform/observability';
             </button>
           </div>
         </mat-card-content>
+        </mat-card>
+      <mat-card class="testing-card">
+        <mat-card-header>
+          <mat-card-title>Platform HTTP Testing</mat-card-title>
+          <mat-card-subtitle>TestApiService Integration</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="test-buttons">
+            <button mat-raised-button color="primary" (click)="apiGetPosts()">Get Posts</button>
+            <button mat-raised-button color="accent" (click)="apiGetPost()">Get Post #1</button>
+            <button mat-raised-button color="warn" (click)="apiError()">Get Error</button>
+            <button mat-stroked-button (click)="apiCreate()">Create Post</button>
+            <button mat-stroked-button (click)="apiUpdate()">Update Post</button>
+            <button mat-stroked-button color="warn" (click)="apiDelete()">Delete Post</button>
+          </div>
+          
+          <div *ngIf="apiResponse" class="api-response">
+            <h4>API Response:</h4>
+            <pre>{{ apiResponse | json }}</pre>
+          </div>
+        </mat-card-content>
       </mat-card>
+
 
       <ng-template #loginTpl>
         <mat-card class="login-card fade-in">
@@ -164,7 +187,9 @@ import { TrackerService } from '@platform/observability';
     .btn-warning.mat-mdc-mini-fab { background-color: #ef6c00; color: white; }
     .toast-buttons { display: flex; gap: 0.5rem; align-items: center; }
     .toast-positions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .toast-positions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
     mat-divider { margin: 1rem 0; }
+    .api-response { margin-top: 1rem; background: #f5f5f5; padding: 1rem; border-radius: 4px; max-height: 200px; overflow: auto; }
   `]
 })
 export class AppComponent implements OnInit {
@@ -281,5 +306,58 @@ export class AppComponent implements OnInit {
     setTimeout(() => {
       this.spinnerService.hide();
     }, 3000);
+  }
+
+  private testApi = inject(TestApiService);
+  apiResponse: any;
+
+  apiGetPosts() {
+    this.apiResponse = 'Loading...';
+    this.testApi.getPosts().subscribe({
+      next: res => this.apiResponse = res.slice(0, 5), // Limit to 5
+      error: err => this.apiResponse = err
+    });
+  }
+
+  apiGetPost() {
+    this.apiResponse = 'Loading...';
+    this.testApi.getPost(1).subscribe({
+      next: res => this.apiResponse = res,
+      error: err => this.apiResponse = err
+    });
+  }
+
+  apiError() {
+    this.apiResponse = 'Loading...';
+    this.testApi.getNonExistent().subscribe({
+      next: res => this.apiResponse = res,
+      error: err => this.apiResponse = err
+    });
+  }
+
+  apiCreate() {
+    this.apiResponse = 'Creating...';
+    const newPost = { title: 'New Post', body: 'This is a new post', userId: 1 };
+    this.testApi.createPost(newPost).subscribe({
+      next: res => this.apiResponse = res,
+      error: err => this.apiResponse = err
+    });
+  }
+
+  apiUpdate() {
+    this.apiResponse = 'Updating...';
+    const update = { title: 'Updated Title' };
+    this.testApi.updatePost(1, update).subscribe({
+      next: res => this.apiResponse = res,
+      error: err => this.apiResponse = err
+    });
+  }
+
+  apiDelete() {
+    this.apiResponse = 'Deleting...';
+    this.testApi.deletePost(1).subscribe({
+      next: () => this.apiResponse = 'Deleted successfully',
+      error: err => this.apiResponse = err
+    });
   }
 }

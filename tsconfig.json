@@ -37,6 +37,9 @@
       ],
       "@platform/ui-feedback": [
         "libs/ui-feedback/src/public-api.ts"
+      ],
+      "@platform/framework": [
+        "framework/public-api.ts"
       ]
     }
   },

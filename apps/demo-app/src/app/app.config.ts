@@ -8,13 +8,26 @@ import { provideUiFeedback, MaterialUiService, NgxSpinnerImplService } from '@pl
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { provideObservability, apiPerformanceInterceptor } from '@platform/observability';
 import { ConsoleLoggerPlugin } from './observability-console.plugin';
+import { provideAppPlatform } from '@platform/framework';
 
 export const appConfig: ApplicationConfig = {
     providers: [
         provideZoneChangeDetection({ eventCoalescing: true }),
         provideRouter([]),
+        provideAppPlatform({
+            api: {
+                baseUrl: 'https://jsonplaceholder.typicode.com', // Using JSONPlaceholder for testing
+                timeout: 5000
+            },
+            ui: {
+                enablePopup: true,
+                enableModal: true,
+                enableLoading: true
+            },
+            debug: true
+        }),
         provideCore({
-            apiUrl: 'https://demo.duendesoftware.com/api',
+            apiUrl: 'https://demo.duendesoftware.com/api', // Keep orig for auth if needed, but platform uses its own config
             production: false,
             logLevel: 'debug',
             storageSecret: 'my-super-secret-key-123',
