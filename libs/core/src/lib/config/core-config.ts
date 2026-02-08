@@ -12,6 +12,7 @@ export interface CoreConfig {
     production: boolean;
     logLevel?: 'debug' | 'info' | 'warn' | 'error';
     inactivity?: InactivityConfig;
+    storageSecret?: string;
 }
 
 export const CORE_CONFIG = new InjectionToken<CoreConfig>('PLATFORM_CORE_CONFIG');

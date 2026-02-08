@@ -5,11 +5,14 @@
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
+    "skipLibCheck": true,
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
@@ -23,9 +26,6 @@
       "dom"
     ],
     "paths": {
-      "@tunga/auth-core": [
-        "libs/auth-core/public-api.ts"
-      ],
       "@platform/auth": [
         "libs/auth/src/public-api.ts"
       ],
@@ -45,31 +45,5 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  },
-  "references": [
-    {
-      "path": "./libs/core/tsconfig.lib.json"
-    },
-    {
-      "path": "./libs/core/tsconfig.spec.json"
-    },
-    {
-      "path": "./libs/auth/tsconfig.lib.json"
-    },
-    {
-      "path": "./libs/auth/tsconfig.spec.json"
-    },
-    {
-      "path": "./libs/ui-feedback/tsconfig.lib.json"
-    },
-    {
-      "path": "./libs/ui-feedback/tsconfig.spec.json"
-    },
-    {
-      "path": "./libs/observability/tsconfig.lib.json"
-    },
-    {
-      "path": "./libs/observability/tsconfig.spec.json"
-    }
-  ]
+  }
 }

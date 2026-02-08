@@ -3,10 +3,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../out-tsc/lib",
+    "outDir": "../../out-tsc/libs/ui-feedback",
     "declaration": true,
     "declarationMap": true,
-    "inlineSources": true,
+    "inlineSources": true, 
     "types": []
   },
   "include": [
@@ -16,3 +16,4 @@
     "**/*.spec.ts"
   ]
 }
+

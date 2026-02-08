@@ -3,10 +3,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../out-tsc/lib",
+    "outDir": "../../out-tsc/libs/auth",
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
+    
     "types": []
   },
   "include": [
@@ -14,5 +15,11 @@
   ],
   "exclude": [
     "**/*.spec.ts"
+  ],
+  "references": [
+    {
+      "path": "../core/tsconfig.lib.json"
+    }
   ]
 }
+

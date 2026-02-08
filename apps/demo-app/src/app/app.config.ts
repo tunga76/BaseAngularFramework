@@ -14,6 +14,7 @@ export const appConfig: ApplicationConfig = {
             apiUrl: 'https://demo.duendesoftware.com/api',
             production: false,
             logLevel: 'debug',
+            storageSecret: 'my-super-secret-key-123',
             inactivity: {
                 enabled: true,
                 idleTimeoutMs: 5 * 60 * 1000, // 5 minutes

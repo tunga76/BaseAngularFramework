@@ -3,13 +3,13 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../out-tsc/spec",
+    "outDir": "../../out-tsc/libs/ui-feedback-spec",
     "types": [
-      "jasmine"
-    ]
-  },
+      "jasmine" ] },
   "include": [
     "src/**/*.d.ts",
     "src/**/*.spec.ts"
   ]
 }
+
+
