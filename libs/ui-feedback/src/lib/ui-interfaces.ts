@@ -4,7 +4,7 @@ export interface ConfirmOptions {
     title?: string;
     confirmText?: string;
     cancelText?: string;
-    type?: 'info' | 'warning' | 'danger';
+    type?: 'info' | 'success' | 'warning' | 'danger';
 }
 
 export abstract class ConfirmService {
@@ -18,6 +18,29 @@ export abstract class AlertService {
     abstract warn(message: string): void;
 }
 
+export type ToastType = 'success' | 'error' | 'warning' | 'info';
+
+export interface ToastOptions {
+    duration?: number;
+    type?: ToastType;
+    action?: string;
+    horizontalPosition?: 'start' | 'center' | 'end' | 'left' | 'right';
+    verticalPosition?: 'top' | 'bottom';
+}
+
 export abstract class ToastService {
-    abstract show(message: string, duration?: number): void;
+    abstract show(message: string, options?: ToastOptions | number): void;
+}
+
+export interface SpinnerOptions {
+    type?: string;
+    bdColor?: string;
+    color?: string;
+    size?: 'small' | 'medium' | 'large';
+    fullScreen?: boolean;
+}
+
+export abstract class SpinnerService {
+    abstract show(name?: string, options?: SpinnerOptions): void;
+    abstract hide(name?: string): void;
 }

@@ -1,10 +1,13 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideCore } from '@platform/core';
 import { provideAuth, authInterceptor } from '@platform/auth';
-import { provideUiFeedback } from '@platform/ui-feedback';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideUiFeedback, MaterialUiService, NgxSpinnerImplService } from '@platform/ui-feedback';
+import { NgxSpinnerModule } from 'ngx-spinner';
 import { provideObservability, apiPerformanceInterceptor } from '@platform/observability';
+import { ConsoleLoggerPlugin } from './observability-console.plugin';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -34,10 +37,17 @@ export const appConfig: ApplicationConfig = {
             scope: 'api openid profile email offline_access',
             postLogoutRedirectUri: window.location.origin
         }),
-        provideUiFeedback(),
+        provideAnimations(),
+        importProvidersFrom(NgxSpinnerModule),
+        provideUiFeedback({
+            alertService: MaterialUiService,
+            confirmService: MaterialUiService,
+            toastService: MaterialUiService,
+            spinnerService: NgxSpinnerImplService
+        }),
         provideObservability({
             enabled: true,
-            plugins: [],
+            plugins: [new ConsoleLoggerPlugin()],
             trackApiPerformance: true
         }),
         provideHttpClient(

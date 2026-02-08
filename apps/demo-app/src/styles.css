@@ -1,3 +1,86 @@
-body { font-family: system-ui, -apple-system, sans-serif; padding: 2rem; }
-button { padding: 0.5rem 1rem; margin-right: 0.5rem; cursor: pointer; }
-pre { background: #f4f4f4; padding: 1rem; border-radius: 4px; overflow: auto; }
+@import "@angular/material/prebuilt-themes/indigo-pink.css";
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    padding: 2rem;
+}
+
+button {
+    padding: 0.5rem 1rem;
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+pre {
+    background: #f4f4f4;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow: auto;
+}
+
+/* Custom SnackBars */
+.snack-success .mdc-snackbar__surface {
+    background-color: #2e7d32 !important;
+    color: white !important;
+}
+
+.snack-success .mat-mdc-snack-bar-action {
+    color: #e8f5e9 !important;
+}
+
+.snack-error .mdc-snackbar__surface {
+    background-color: #c62828 !important;
+    color: white !important;
+}
+
+.snack-error .mat-mdc-snack-bar-action {
+    color: #ffebee !important;
+}
+
+.snack-warning .mdc-snackbar__surface {
+    background-color: #ef6c00 !important;
+    color: white !important;
+}
+
+.snack-warning .mat-mdc-snack-bar-action {
+    color: #fff3e0 !important;
+}
+
+.snack-info .mdc-snackbar__surface {
+    background-color: #1565c0 !important;
+    color: white !important;
+}
+
+.snack-info .mat-mdc-snack-bar-action {
+    color: #e3f2fd !important;
+}
+
+/* Modern Dialog Panel */
+.modern-dialog-panel .mat-mdc-dialog-container {
+    padding: 0;
+    border-radius: 16px !important;
+    overflow: hidden;
+}
+
+.modern-dialog-panel .mdc-dialog__surface {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 16px !important;
+}
+
+/* Dialog Animation Entry */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 50px, 0) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+.modern-dialog-panel {
+    animation: slideInUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
