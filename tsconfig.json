@@ -1,37 +1,75 @@
 {
-    "compileOnSave": false,
-    "compilerOptions": {
-        "baseUrl": "./",
-        "outDir": "./dist/out-tsc",
-        "forceConsistentCasingInFileNames": true,
-        "strict": true,
-        "noImplicitOverride": true,
-        "noPropertyAccessFromIndexSignature": true,
-        "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true,
-        "sourceMap": true,
-        "declaration": false,
-        "downlevelIteration": true,
-        "experimentalDecorators": true,
-        "moduleResolution": "node",
-        "importHelpers": true,
-        "target": "ES2022",
-        "module": "ES2022",
-        "useDefineForClassFields": false,
-        "lib": [
-            "ES2022",
-            "dom"
-        ],
-        "paths": {
-            "@my-org/auth-core": [
-                "libs/auth-core/public-api.ts"
-            ]
-        }
-    },
-    "angularCompilerOptions": {
-        "enableI18nLegacyMessageIdFormat": false,
-        "strictInjectionParameters": true,
-        "strictInputAccessModifiers": true,
-        "strictTemplates": true
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "lib": [
+      "ES2022",
+      "dom"
+    ],
+    "paths": {
+      "@tunga/auth-core": [
+        "libs/auth-core/public-api.ts"
+      ],
+      "@platform/auth": [
+        "libs/auth/src/public-api.ts"
+      ],
+      "@platform/core": [
+        "libs/core/src/public-api.ts"
+      ],
+      "@platform/observability": [
+        "libs/observability/src/public-api.ts"
+      ],
+      "@platform/ui-feedback": [
+        "libs/ui-feedback/src/public-api.ts"
+      ]
     }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "references": [
+    {
+      "path": "./libs/core/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/core/tsconfig.spec.json"
+    },
+    {
+      "path": "./libs/auth/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/auth/tsconfig.spec.json"
+    },
+    {
+      "path": "./libs/ui-feedback/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/ui-feedback/tsconfig.spec.json"
+    },
+    {
+      "path": "./libs/observability/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/observability/tsconfig.spec.json"
+    }
+  ]
 }

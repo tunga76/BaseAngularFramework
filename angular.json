@@ -98,6 +98,126 @@
                     }
                 }
             }
+        },
+        "core": {
+          "projectType": "library",
+          "root": "libs/core",
+          "sourceRoot": "libs/core/src",
+          "prefix": "platform",
+          "architect": {
+            "build": {
+              "builder": "@angular/build:ng-packagr",
+              "configurations": {
+                "production": {
+                  "tsConfig": "libs/core/tsconfig.lib.prod.json"
+                },
+                "development": {
+                  "tsConfig": "libs/core/tsconfig.lib.json"
+                }
+              },
+              "defaultConfiguration": "production"
+            },
+            "test": {
+              "builder": "@angular/build:karma",
+              "options": {
+                "tsConfig": "libs/core/tsconfig.spec.json",
+                "polyfills": [
+                  "zone.js",
+                  "zone.js/testing"
+                ]
+              }
+            }
+          }
+        },
+        "auth": {
+          "projectType": "library",
+          "root": "libs/auth",
+          "sourceRoot": "libs/auth/src",
+          "prefix": "platform",
+          "architect": {
+            "build": {
+              "builder": "@angular/build:ng-packagr",
+              "configurations": {
+                "production": {
+                  "tsConfig": "libs/auth/tsconfig.lib.prod.json"
+                },
+                "development": {
+                  "tsConfig": "libs/auth/tsconfig.lib.json"
+                }
+              },
+              "defaultConfiguration": "production"
+            },
+            "test": {
+              "builder": "@angular/build:karma",
+              "options": {
+                "tsConfig": "libs/auth/tsconfig.spec.json",
+                "polyfills": [
+                  "zone.js",
+                  "zone.js/testing"
+                ]
+              }
+            }
+          }
+        },
+        "ui-feedback": {
+          "projectType": "library",
+          "root": "libs/ui-feedback",
+          "sourceRoot": "libs/ui-feedback/src",
+          "prefix": "platform",
+          "architect": {
+            "build": {
+              "builder": "@angular/build:ng-packagr",
+              "configurations": {
+                "production": {
+                  "tsConfig": "libs/ui-feedback/tsconfig.lib.prod.json"
+                },
+                "development": {
+                  "tsConfig": "libs/ui-feedback/tsconfig.lib.json"
+                }
+              },
+              "defaultConfiguration": "production"
+            },
+            "test": {
+              "builder": "@angular/build:karma",
+              "options": {
+                "tsConfig": "libs/ui-feedback/tsconfig.spec.json",
+                "polyfills": [
+                  "zone.js",
+                  "zone.js/testing"
+                ]
+              }
+            }
+          }
+        },
+        "observability": {
+          "projectType": "library",
+          "root": "libs/observability",
+          "sourceRoot": "libs/observability/src",
+          "prefix": "platform",
+          "architect": {
+            "build": {
+              "builder": "@angular/build:ng-packagr",
+              "configurations": {
+                "production": {
+                  "tsConfig": "libs/observability/tsconfig.lib.prod.json"
+                },
+                "development": {
+                  "tsConfig": "libs/observability/tsconfig.lib.json"
+                }
+              },
+              "defaultConfiguration": "production"
+            },
+            "test": {
+              "builder": "@angular/build:karma",
+              "options": {
+                "tsConfig": "libs/observability/tsconfig.spec.json",
+                "polyfills": [
+                  "zone.js",
+                  "zone.js/testing"
+                ]
+              }
+            }
+          }
         }
     }
 }
