@@ -1,19 +1,38 @@
 import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 import { provideCore } from '@platform/core';
-import { provideAuth, authInterceptor } from '@platform/auth';
+import { provideAuth, authInterceptor, permissionGuard } from '@platform/auth';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideUiFeedback, MaterialUiService, NgxSpinnerImplService } from '@platform/ui-feedback';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { provideObservability, apiPerformanceInterceptor } from '@platform/observability';
 import { ConsoleLoggerPlugin } from './observability-console.plugin';
-import { provideAppPlatform } from '@platform/framework';
+import { provideAppPlatform, LOADING_ADAPTER, POPUP_ADAPTER, MaterialPopupAdapter } from '@platform/framework';
+import { NgxSpinnerAdapter } from './adapters/ngx-spinner.adapter';
 
 export const appConfig: ApplicationConfig = {
     providers: [
         provideZoneChangeDetection({ eventCoalescing: true }),
-        provideRouter([]),
+        provideRouter([
+            { path: '', loadComponent: () => import('./home/home.component').then(m => m.HomeComponent) },
+            { path: 'callback', loadComponent: () => import('./auth/callback.component').then(m => m.CallbackComponent) },
+            {
+                path: 'admin',
+                loadComponent: () => import('./home/home.component').then(m => m.HomeComponent),
+                canActivate: [permissionGuard('Kullanici')]
+            },
+            {
+                path: 'reports',
+                loadComponent: () => import('./home/home.component').then(m => m.HomeComponent),
+                canActivate: [permissionGuard('Kullanici')]
+            },
+            {
+                path: 'settings',
+                loadComponent: () => import('./home/home.component').then(m => m.HomeComponent)
+            },
+            { path: '**', redirectTo: '' }
+        ]),
         provideAppPlatform({
             api: {
                 baseUrl: 'https://jsonplaceholder.typicode.com', // Using JSONPlaceholder for testing
@@ -27,7 +46,7 @@ export const appConfig: ApplicationConfig = {
             debug: true
         }),
         provideCore({
-            apiUrl: 'https://demo.duendesoftware.com/api', // Keep orig for auth if needed, but platform uses its own config
+            apiUrl: 'https://localhost:5001', // Keep orig for auth if needed, but platform uses its own config
             production: false,
             logLevel: 'debug',
             storageSecret: 'my-super-secret-key-123',
@@ -38,16 +57,16 @@ export const appConfig: ApplicationConfig = {
             }
         }),
         provideAuth({
-            clientId: 'interactive.public',
+            clientId: 'angular_dev.app',
             pkce: true,
             responseType: 'code',
             usePkce: true,
             useRefreshToken: true,
             useIdTokenHint: true,
             useNonce: true,
-            issuer: 'https://demo.duendesoftware.com/connect',
+            issuer: 'https://localhost:5001/connect',
             redirectUri: window.location.origin + '/callback',
-            scope: 'api openid profile email offline_access',
+            scope: 'openid profile api1 offline_access',
             postLogoutRedirectUri: window.location.origin
         }),
         provideAnimations(),
@@ -58,6 +77,14 @@ export const appConfig: ApplicationConfig = {
             toastService: MaterialUiService,
             spinnerService: NgxSpinnerImplService
         }),
+        {
+            provide: LOADING_ADAPTER,
+            useClass: NgxSpinnerAdapter
+        },
+        {
+            provide: POPUP_ADAPTER,
+            useClass: MaterialPopupAdapter
+        },
         provideObservability({
             enabled: true,
             plugins: [new ConsoleLoggerPlugin()],
@@ -67,7 +94,8 @@ export const appConfig: ApplicationConfig = {
             withInterceptors([
                 authInterceptor,
                 apiPerformanceInterceptor
-            ])
+            ]),
+            withInterceptorsFromDi()
         )
     ]
 };

@@ -18,6 +18,7 @@ export interface AuthState {
 export class AuthService {
     private config = inject(AUTH_CONFIG);
     private apiClient = inject(ApiClient);
+    private http = inject(HttpClient);
     private storage = inject(STORAGE_SERVICE);
     private logger = inject(LOGGER_SERVICE);
     private inactivity = inject(InactivityService, { optional: true });
@@ -52,10 +53,24 @@ export class AuthService {
             return of(null);
         }
 
+        const now = Date.now();
+        const timeLeftMs = state.expiresAt ? state.expiresAt - now : 0;
+        const timeLeftSec = Math.floor(timeLeftMs / 1000);
+
         // Buffer time: 30 seconds
-        const isExpired = state.expiresAt && (Date.now() + 30000) > state.expiresAt;
-        if (isExpired && state.refreshToken) {
-            return this.refresh();
+        const isExpired = state.expiresAt && (now + 30000) > state.expiresAt;
+
+        if (isExpired) {
+            this.logger.info(`[Auth] Token is expiring in ${timeLeftSec}s (Buffer: 30s). Triggering refresh...`);
+            if (state.refreshToken) {
+                return this.refresh();
+            } else {
+                this.logger.warn('[Auth] Token expired but no refresh token available.');
+            }
+        } else {
+            // Only log every few calls or if specifically debugging to avoid console noise, 
+            // but since user asked for monitoring, let's log it.
+            this.logger.debug(`[Auth] Access Token valid. Time left: ${timeLeftSec}s`);
         }
 
         return of(state.accessToken);
@@ -131,7 +146,10 @@ export class AuthService {
             .set('refresh_token', refreshToken)
             .set('client_id', this.config.clientId);
 
-        this.refreshInProgress$ = this.apiClient.post<any>(`${this.config.issuer}/token`, body, {
+        const tokenUrl = `${this.config.issuer}/token`;
+        this.logger.debug(`[Auth] Starting token refresh request to: ${tokenUrl}`);
+
+        this.refreshInProgress$ = this.apiClient.post<any>(tokenUrl, body, {
             headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
         }).pipe(
             map(res => {
@@ -160,13 +178,60 @@ export class AuthService {
         return this.state().userClaims;
     }
 
+    /**
+     * Helper to get all permissions and roles from the current user claims.
+     * Supports both 'permissions' and 'role' (or 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role') claims.
+     */
+    getPermissions(): string[] {
+        const claims = this.getUserClaims();
+        if (!claims) return [];
+
+        const extractFromClaim = (claim: any): string[] => {
+            if (!claim) return [];
+            if (Array.isArray(claim)) return claim;
+            if (typeof claim === 'string') {
+                // Handle stringified JSON arrays like polnet_roles: "[\"Role1\", \"Role2\"]"
+                if (claim.trim().startsWith('[') && claim.trim().endsWith(']')) {
+                    try {
+                        return JSON.parse(claim);
+                    } catch {
+                        return [claim];
+                    }
+                }
+                return [claim];
+            }
+            return [];
+        };
+
+        const permissions = extractFromClaim(claims.permissions);
+        const roles = extractFromClaim(claims.role);
+        const polnetRoles = extractFromClaim(claims.polnet_roles);
+        const msRoles = extractFromClaim(claims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']);
+
+        return [...new Set([...permissions, ...roles, ...polnetRoles, ...msRoles])];
+    }
+
     private updateState(response: any): void {
+        const expiresAt = Date.now() + (response.expires_in * 1000);
+        const expiresInMin = Math.floor(response.expires_in / 60);
+
+        // Try to get claims from ID Token first, then Access Token. 
+        // Some providers put roles in Access Token, some in ID Token.
+        const idTokenClaims = response.id_token ? this.decodeToken(response.id_token) : null;
+        const accessTokenClaims = response.access_token ? this.decodeToken(response.access_token) : null;
+
+        // Merge claims, giving priority to Access Token claims if they contain roles 
+        // because IdentityServer typically puts roles there.
+        const mergedClaims = { ...(idTokenClaims || {}), ...(accessTokenClaims || {}) };
+
+        this.logger.info(`[Auth] Token acquired/refreshed. Valid for ${response.expires_in}s (~${expiresInMin} min). Expires at: ${new Date(expiresAt).toLocaleTimeString()}`);
+
         this.state.set({
             accessToken: response.access_token,
             idToken: response.id_token,
             refreshToken: response.refresh_token || this.state().refreshToken,
-            expiresAt: Date.now() + (response.expires_in * 1000),
-            userClaims: this.decodeToken(response.id_token || response.access_token)
+            expiresAt: expiresAt,
+            userClaims: mergedClaims
         });
     }
 
@@ -174,7 +239,11 @@ export class AuthService {
         try {
             const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            return JSON.parse(window.atob(base64));
+            // Solution for UTF-8 characters in Base64:
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
         } catch (e) {
             return null;
         }

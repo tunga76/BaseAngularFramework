@@ -96,4 +96,17 @@ export class InactivityService {
     reset(): void {
         this.recordActivity();
     }
+
+    /**
+     * For testing purposes: Manually trigger the inactivity sequence
+     */
+    simulateTimeout(ms: number = 5000, warningMs: number = 2000): void {
+        this.ngZone.runOutsideAngular(() => {
+            timer(ms - warningMs).pipe(
+                tap(() => this.ngZone.run(() => this.warning$.next(true))),
+                switchMap(() => timer(warningMs)),
+                tap(() => this.ngZone.run(() => this.timeout$.next()))
+            ).subscribe();
+        });
+    }
 }

@@ -11,8 +11,8 @@ export class IfPermissionDirective {
     private authService = inject(AuthService);
 
     @Input() set ifPermission(permission: string) {
-        const claims = this.authService.getUserClaims();
-        const hasPermission = claims?.permissions?.includes(permission);
+        const permissions = this.authService.getPermissions();
+        const hasPermission = permissions.includes(permission);
 
         if (hasPermission) {
             this.viewContainer.createEmbeddedView(this.templateRef);

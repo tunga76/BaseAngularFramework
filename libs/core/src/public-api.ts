@@ -10,4 +10,6 @@ export * from './lib/loading/loading.service';
 export * from './lib/inactivity/inactivity.service';
 export * from './lib/logging/logger.service';
 export * from './lib/storage/storage.service';
+export * from './lib/navigation/menu-item';
+export * from './lib/navigation/menu.service';
 export * from './lib/providers';

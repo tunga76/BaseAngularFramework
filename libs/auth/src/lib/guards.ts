@@ -18,12 +18,14 @@ export const authGuard: CanActivateFn = () => {
 export function permissionGuard(requiredPermission: string): CanActivateFn {
     return () => {
         const authService = inject(AuthService);
-        const claims = authService.getUserClaims();
+        const router = inject(Router);
+        const permissions = authService.getPermissions();
 
-        if (claims?.permissions?.includes(requiredPermission)) {
+        if (permissions.includes(requiredPermission)) {
             return true;
         }
 
+        router.navigate(['/']);
         return false;
     };
 }

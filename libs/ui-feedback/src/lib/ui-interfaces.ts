@@ -41,6 +41,7 @@ export interface SpinnerOptions {
 }
 
 export abstract class SpinnerService {
+    message?: string;
     abstract show(name?: string, options?: SpinnerOptions): void;
     abstract hide(name?: string): void;
 }

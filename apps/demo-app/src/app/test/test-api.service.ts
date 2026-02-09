@@ -42,6 +42,16 @@ export class TestApiService extends BaseHttpService {
         return this.get('non-existent-endpoint');
     }
 
+    // Circuit Breaker Test
+    getWithCircuitBreaker(): Observable<any> {
+        return this.get('failing-endpoint-to-trip-breaker', {
+            resilience: {
+                circuitBreaker: true,
+                retry: 0 // Don't retry so we trip fixed threshold faster
+            }
+        });
+    }
+
     // Loading State Test (using delay from a real API or mock)
     // Since we use jsonplaceholder (likely), we might not have a delay endpoint, 
     // but the network latency should show it.

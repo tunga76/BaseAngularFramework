@@ -7,6 +7,7 @@ import { SpinnerService, SpinnerOptions } from './ui-interfaces';
 })
 export class NgxSpinnerImplService implements SpinnerService {
     private spinner = inject(NgxSpinner);
+    message?: string;
 
     show(name?: string, options?: SpinnerOptions): void {
         this.spinner.show(name, options);
