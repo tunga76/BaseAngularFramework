@@ -1,8 +1,14 @@
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 
 body {
-    font-family: system-ui, -apple-system, sans-serif;
-    padding: 2rem;
+    font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+*, *::before, *::after {
+    box-sizing: inherit;
 }
 
 button {

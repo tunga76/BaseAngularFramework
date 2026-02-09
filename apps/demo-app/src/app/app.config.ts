@@ -27,10 +27,10 @@ export const appConfig: ApplicationConfig = {
                 loadComponent: () => import('./home/home.component').then(m => m.HomeComponent),
                 canActivate: [permissionGuard('Kullanici')]
             },
-            {
-                path: 'settings',
-                loadComponent: () => import('./home/home.component').then(m => m.HomeComponent)
-            },
+            { path: 'settings', loadComponent: () => import('./home/home.component').then(m => m.HomeComponent) },
+            { path: 'forms', loadComponent: () => import('./forms/form-list.component').then(m => m.FormListComponent) },
+            { path: 'form-preview', loadComponent: () => import('./forms/form-preview.component').then(m => m.FormPreviewComponent) },
+            { path: 'form-builder', loadComponent: () => import('@platform/form-builder').then(m => m.SampleBuilderUsageComponent) },
             { path: '**', redirectTo: '' }
         ]),
         provideAppPlatform({

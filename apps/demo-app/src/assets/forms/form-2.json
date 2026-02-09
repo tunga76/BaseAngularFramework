@@ -1,0 +1,48 @@
+{
+    "id": "2",
+    "name": "Identity Proofing Schema",
+    "elements": [
+        {
+            "key": "id_type",
+            "type": "select",
+            "templateOptions": {
+                "label": "Document Type",
+                "options": [
+                    {
+                        "label": "Passport",
+                        "value": "passport"
+                    },
+                    {
+                        "label": "Driver License",
+                        "value": "license"
+                    },
+                    {
+                        "label": "ID Card",
+                        "value": "idcard"
+                    }
+                ],
+                "required": true
+            },
+            "className": "col-12"
+        },
+        {
+            "key": "id_number",
+            "type": "text",
+            "templateOptions": {
+                "label": "Document Number",
+                "placeholder": "Enter document ID",
+                "required": true
+            },
+            "className": "col-12"
+        },
+        {
+            "key": "expiry_date",
+            "type": "text",
+            "templateOptions": {
+                "label": "Expiry Date",
+                "placeholder": "YYYY-MM-DD"
+            },
+            "className": "col-md-6"
+        }
+    ]
+}

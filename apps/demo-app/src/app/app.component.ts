@@ -92,7 +92,8 @@ export class AppComponent {
       { id: 'home', label: 'Home', icon: 'home', route: '/' },
       { id: 'admin', label: 'Admin Panel', icon: 'admin_panel_settings', route: '/admin', permission: 'Kullanici' },
       { id: 'reports', label: 'Reports', icon: 'bar_chart', route: '/reports', permission: 'Kullanici' },
-      { id: 'settings', label: 'Settings', icon: 'settings', route: '/settings' }
+      { id: 'settings', label: 'Settings', icon: 'settings', route: '/settings' },
+      { id: 'forms', label: 'Forms', icon: 'dynamic_form', route: '/forms' }
     ];
     this.menuService.setMenu(menu);
   }

@@ -17,7 +17,7 @@
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "moduleResolution": "bundler",
-    "importHelpers": true,
+    "importHelpers": false,
     "target": "ES2022",
     "module": "ESNext",
     "useDefineForClassFields": false,
@@ -37,6 +37,9 @@
       ],
       "@platform/ui-feedback": [
         "libs/ui-feedback/src/public-api.ts"
+      ],
+      "@platform/form-builder": [
+        "libs/form-builder/src/index.ts"
       ],
       "@platform/framework": [
         "framework/public-api.ts"

@@ -1,0 +1,111 @@
+{
+  "id": "1",
+  "title": "User Registration Form",
+  "fields": [
+    {
+      "id": "267ae6c6-8aac-488d-b105-396fba7765d1",
+      "name": "text_bz8py",
+      "label": "New Text",
+      "type": "text",
+      "validators": [],
+      "ui": {
+        "colSpan": {
+          "xs": 12,
+          "md": 12,
+          "lg": 12
+        }
+      }
+    },
+    {
+      "id": "5638b79f-10a8-4360-88d0-4eb7954d1217",
+      "name": "text_igj2v",
+      "label": "New Text",
+      "type": "text",
+      "validators": [],
+      "ui": {
+        "colSpan": {
+          "xs": 12,
+          "md": 12,
+          "lg": 12
+        }
+      }
+    },
+    {
+      "id": "0b37b1eb-7338-4b06-bbb0-353298ee5f86",
+      "name": "text_3xpci",
+      "label": "New Text",
+      "type": "text",
+      "validators": [],
+      "ui": {
+        "colSpan": {
+          "xs": 12,
+          "md": 12,
+          "lg": 12
+        }
+      }
+    },
+    {
+      "id": "a1a1380b-ae4a-4190-950b-4dd099bbe14c",
+      "name": "username",
+      "label": "Username",
+      "type": "text",
+      "validators": [
+        {
+          "type": "required"
+        },
+        {
+          "type": "numeric"
+        },
+        {
+          "type": "tcNo"
+        }
+      ],
+      "ui": {
+        "placeholder": "Enter username",
+        "colSpan": {
+          "xs": 12,
+          "md": 12,
+          "lg": 12
+        }
+      }
+    },
+    {
+      "id": "6c2a132a-dd7c-4a6d-8c29-ee117e71f66e",
+      "name": "email",
+      "label": "Email Address",
+      "type": "text",
+      "validators": [
+        {
+          "type": "required"
+        }
+      ],
+      "ui": {
+        "placeholder": "name@example.com",
+        "colSpan": {
+          "xs": 12,
+          "md": 12,
+          "lg": 12
+        }
+      }
+    },
+    {
+      "id": "0b6c911e-354b-4718-a58e-f4c1cfb1871e",
+      "name": "password",
+      "label": "Password",
+      "type": "text",
+      "validators": [
+        {
+          "type": "required"
+        }
+      ],
+      "ui": {
+        "placeholder": "Minimum 8 characters",
+        "colSpan": {
+          "xs": 12,
+          "md": 12,
+          "lg": 12
+        }
+      }
+    }
+  ]
+}

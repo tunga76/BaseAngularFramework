@@ -1,0 +1,53 @@
+{
+    "id": "3",
+    "name": "Customer Feedback V2",
+    "elements": [
+        {
+            "key": "rating",
+            "type": "select",
+            "templateOptions": {
+                "label": "Overall Satisfaction",
+                "options": [
+                    {
+                        "label": "Very Satisfied",
+                        "value": "5"
+                    },
+                    {
+                        "label": "Satisfied",
+                        "value": "4"
+                    },
+                    {
+                        "label": "Neutral",
+                        "value": "3"
+                    },
+                    {
+                        "label": "Unsatisfied",
+                        "value": "2"
+                    },
+                    {
+                        "label": "Very Unsatisfied",
+                        "value": "1"
+                    }
+                ]
+            },
+            "className": "col-12"
+        },
+        {
+            "key": "comments",
+            "type": "text",
+            "templateOptions": {
+                "label": "Your Feedback",
+                "placeholder": "Tell us what you think..."
+            },
+            "className": "col-12"
+        },
+        {
+            "key": "recommend",
+            "type": "checkbox",
+            "templateOptions": {
+                "label": "I would recommend this service to others"
+            },
+            "className": "col-12"
+        }
+    ]
+}

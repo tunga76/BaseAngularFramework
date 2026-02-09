@@ -1,0 +1,23 @@
+[
+    {
+        "id": "1",
+        "name": "User Registration Form",
+        "fieldsCount": 3,
+        "lastModified": "2026-02-09",
+        "status": "Published"
+    },
+    {
+        "id": "2",
+        "name": "Identity Proofing Schema",
+        "fieldsCount": 8,
+        "lastModified": "2026-02-08",
+        "status": "Draft"
+    },
+    {
+        "id": "3",
+        "name": "Customer Feedback V2",
+        "fieldsCount": 3,
+        "lastModified": "2026-02-01",
+        "status": "Published"
+    }
+]
