@@ -43,6 +43,15 @@
       ],
       "@platform/framework": [
         "framework/public-api.ts"
+      ],
+      "@platform/integrated": [
+        "platform/index.ts"
+      ],
+      "@platform/directives": [
+        "projects/platform-directives/src/public-api.ts"
+      ],
+      "@platform/ui-platform": [
+        "libs/ui-platform/src/public-api.ts"
       ]
     }
   },
@@ -51,5 +60,13 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "references": [
+    {
+      "path": "./libs/ui-platform/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/ui-platform/tsconfig.spec.json"
+    }
+  ]
 }

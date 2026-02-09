@@ -15,23 +15,27 @@ export const appConfig: ApplicationConfig = {
     providers: [
         provideZoneChangeDetection({ eventCoalescing: true }),
         provideRouter([
-            { path: '', loadComponent: () => import('./home/home.component').then(m => m.HomeComponent) },
-            { path: 'callback', loadComponent: () => import('./auth/callback.component').then(m => m.CallbackComponent) },
+            { path: '', loadComponent: () => import('./home/home.component').then(m => m.HomeComponent), data: { layout: 'dashboard' } },
+            { path: 'callback', loadComponent: () => import('./auth/callback.component').then(m => m.CallbackComponent), data: { layout: 'fullscreen' } },
             {
                 path: 'admin',
                 loadComponent: () => import('./home/home.component').then(m => m.HomeComponent),
-                canActivate: [permissionGuard('Kullanici')]
+                canActivate: [permissionGuard('Kullanici')],
+                data: { layout: 'dashboard' }
             },
             {
                 path: 'reports',
                 loadComponent: () => import('./home/home.component').then(m => m.HomeComponent),
-                canActivate: [permissionGuard('Kullanici')]
+                canActivate: [permissionGuard('Kullanici')],
+                data: { layout: 'dashboard' }
             },
-            { path: 'settings', loadComponent: () => import('./home/home.component').then(m => m.HomeComponent) },
+            { path: 'settings', loadComponent: () => import('./home/home.component').then(m => m.HomeComponent), data: { layout: 'dashboard' } },
             { path: 'forms', loadComponent: () => import('./forms/form-list.component').then(m => m.FormListComponent) },
             { path: 'form-preview', loadComponent: () => import('./forms/form-preview.component').then(m => m.FormPreviewComponent) },
             { path: 'form-builder', loadComponent: () => import('@platform/form-builder').then(m => m.SampleBuilderUsageComponent) },
+            { path: 'directives', loadComponent: () => import('./directives-test/directives-test.component').then(m => m.DirectivesTestComponent), data: { layout: 'split' } },
             { path: '**', redirectTo: '' }
+
         ]),
         provideAppPlatform({
             api: {

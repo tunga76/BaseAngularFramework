@@ -34,7 +34,8 @@
               "node_modules/ngx-spinner/animations/ball-scale-multiple.css",
               "node_modules/ngx-spinner/animations/ball-spin-clockwise.css",
               "node_modules/ngx-spinner/animations/fire.css",
-              "node_modules/ngx-spinner/animations/square-jelly-box.css"
+              "node_modules/ngx-spinner/animations/square-jelly-box.css",
+              "projects/platform-directives/src/lib/loading/loading.css"
             ],
             "scripts": []
           },
@@ -99,6 +100,36 @@
               "apps/demo-app/src/styles.css"
             ],
             "scripts": []
+          }
+        },
+        "storybook": {
+          "builder": "@storybook/angular:start-storybook",
+          "options": {
+            "configDir": "apps/demo-app/.storybook",
+            "browserTarget": "demo-app:build",
+            "compodoc": true,
+            "compodocArgs": [
+              "-e",
+              "json",
+              "-d",
+              "apps/demo-app"
+            ],
+            "port": 6006
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular:build-storybook",
+          "options": {
+            "configDir": "apps/demo-app/.storybook",
+            "browserTarget": "demo-app:build",
+            "compodoc": true,
+            "compodocArgs": [
+              "-e",
+              "json",
+              "-d",
+              "apps/demo-app"
+            ],
+            "outputDir": "dist/storybook/demo-app"
           }
         }
       }
@@ -215,6 +246,69 @@
           "builder": "@angular/build:karma",
           "options": {
             "tsConfig": "libs/observability/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    },
+    "platform-directives": {
+      "projectType": "library",
+      "root": "projects/platform-directives",
+      "sourceRoot": "projects/platform-directives/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/platform-directives/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/platform-directives/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/platform-directives/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "projects/platform-directives/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    },
+    "ui-platform": {
+      "projectType": "library",
+      "root": "libs/ui-platform",
+      "sourceRoot": "libs/ui-platform/src",
+      "prefix": "platform",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/ui-platform/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/ui-platform/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "libs/ui-platform/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"

@@ -1,0 +1,17 @@
+@import './theme/tokens/core.tokens.css';
+@import './theme/themes/light.theme.css';
+@import './theme/themes/dark.theme.css';
+@import './theme/tokens/semantic.tokens.css';
+
+/* Global Reset & Base Styles using tokens */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-family-base);
+    background-color: var(--surface-bg);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}

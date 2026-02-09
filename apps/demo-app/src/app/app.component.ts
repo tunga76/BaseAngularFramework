@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,7 +8,12 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { AuthService } from '@platform/auth';
 import { SpinnerService } from '@platform/ui-feedback';
 import { MenuService, MenuItem } from '@platform/core';
-import { Observable } from 'rxjs';
+import { Observable, filter, map, mergeMap } from 'rxjs';
+import { LayoutRegistryService } from 'libs/ui-platform/src/lib/services/layout-registry.service';
+import { DashboardLayoutComponent } from 'libs/ui-platform/src/lib/layouts/dashboard-layout/dashboard-layout.component';
+import { FullScreenLayoutComponent } from 'libs/ui-platform/src/lib/layouts/fullscreen-layout/fullscreen-layout.component';
+import { SplitViewLayoutComponent } from 'libs/ui-platform/src/lib/layouts/split-view-layout/split-view-layout.component';
+import { ThemeProviderComponent, ThemeConfig } from 'libs/ui-platform/src/lib/theme/theme-provider.component';
 
 @Component({
   selector: 'app-root',
@@ -19,72 +24,108 @@ import { Observable } from 'rxjs';
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
-    NgxSpinnerModule
+    NgxSpinnerModule,
+    ThemeProviderComponent,
+    DashboardLayoutComponent,
+    FullScreenLayoutComponent,
+    SplitViewLayoutComponent
   ],
   template: `
-    <mat-toolbar color="primary" class="app-toolbar">
-      <div class="logo-section">
-        <mat-icon class="logo-icon">auto_awesome</mat-icon>
-        <span class="logo-text">Platform Framework</span>
-      </div>
-      
-      <span class="spacer"></span>
-      
-      <div class="nav-links">
-        <ng-container *ngFor="let item of menuService.menuItems()">
-          <button mat-button [routerLink]="item.route" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
-            <mat-icon *ngIf="item.icon">{{ item.icon }}</mat-icon>
-            {{ item.label }}
-          </button>
-        </ng-container>
-      </div>
+    <platform-theme-provider [config]="themeConfig">
+      <!-- Layout Switcher based on Signals -->
+      <ng-container [ngSwitch]="layoutRegistry.getActiveLayout()">
+        
+        <platform-dashboard-layout *ngSwitchCase="'dashboard'">
+           <div sidebar-header style="padding: 20px; font-weight: bold; font-size: 1.2rem; color: var(--color-primary);">
+            Platform Framework
+          </div>
+          <div sidebar-nav>
+             <ng-container *ngFor="let item of menuService.menuItems()">
+                <button mat-button [routerLink]="item.route" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" style="width: 100%; text-align: left; justify-content: flex-start; padding: 12px;">
+                  <mat-icon *ngIf="item.icon" style="margin-right: 8px;">{{ item.icon }}</mat-icon>
+                  {{ item.label }}
+                </button>
+              </ng-container>
+          </div>
+          <div top-bar style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+             <span style="font-weight: 500;">Enterprise Platform UI</span>
+             <button mat-icon-button *ngIf="isAuthenticated$ | async" (click)="logout()" title="Logout">
+              <mat-icon>logout</mat-icon>
+            </button>
+          </div>
+          <router-outlet></router-outlet>
+        </platform-dashboard-layout>
 
-      <div class="auth-section">
-        <button mat-icon-button *ngIf="isAuthenticated$ | async" (click)="logout()" title="Logout" class="logout-btn">
-          <mat-icon>logout</mat-icon>
-        </button>
-      </div>
-    </mat-toolbar>
+        <platform-fullscreen-layout *ngSwitchCase="'fullscreen'">
+          <router-outlet></router-outlet>
+        </platform-fullscreen-layout>
+
+        <platform-split-view-layout *ngSwitchCase="'split'">
+           <div left-pane style="padding: 20px;">
+              <h3>Navigation</h3>
+              <ng-container *ngFor="let item of menuService.menuItems()">
+                <div [routerLink]="item.route" style="cursor: pointer; padding: 8px 0;">{{ item.label }}</div>
+              </ng-container>
+           </div>
+           <div right-pane>
+              <router-outlet></router-outlet>
+           </div>
+        </platform-split-view-layout>
+
+        <!-- Default Layout fallback -->
+        <main *ngSwitchDefault class="content-area">
+           <router-outlet></router-outlet>
+        </main>
+      </ng-container>
+    </platform-theme-provider>
 
     <ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="ball-scale-multiple" [fullScreen]="true">
       <p style="color: white"> {{ spinnerService.message }} </p>
     </ngx-spinner>
-
-    <main class="content-area">
-      <router-outlet></router-outlet>
-    </main>
   `,
   styles: [`
-    .spacer { flex: 1 1 auto; }
-    .app-toolbar {
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      z-index: 1000;
-      padding: 0 2rem;
-    }
-    .logo-section {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .logo-icon { color: #ffd700; transform: scale(1.2); }
-    .logo-text { font-weight: 600; letter-spacing: 0.5px; }
-    .nav-links { display: flex; gap: 0.5rem; margin: 0 1.5rem; }
-    .active-link { background: rgba(255,255,255,0.15) !important; color: #ffd700 !important; }
-    .content-area { min-height: calc(100vh - 64px); background: #f8f9fa; }
-    .logout-btn { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .logout-btn:hover { transform: rotate(-15deg) scale(1.1); color: #ff5252; }
+    .active-link { background: rgba(63, 81, 181, 0.1) !important; color: var(--color-primary) !important; }
+    .content-area { min-height: 100vh; background: #f8f9fa; }
   `]
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   private auth = inject(AuthService);
   public spinnerService = inject(SpinnerService);
   public menuService = inject(MenuService);
+  public layoutRegistry = inject(LayoutRegistryService);
+  private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
 
   isAuthenticated$: Observable<boolean>;
+  themeConfig: ThemeConfig = { mode: 'light' };
 
   constructor() {
     this.isAuthenticated$ = this.auth.isAuthenticated$();
     this.initMenu();
+    this.registerLayouts();
+  }
+
+  ngOnInit() {
+    // Listen to route changes to switch layout
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      map(() => this.activatedRoute),
+      map(route => {
+        while (route.firstChild) route = route.firstChild;
+        return route;
+      }),
+      mergeMap(route => route.data)
+    ).subscribe(data => {
+      if (data['layout']) {
+        this.layoutRegistry.setActiveLayout(data['layout']);
+      }
+    });
+  }
+
+  private registerLayouts() {
+    this.layoutRegistry.registerLayout('dashboard', DashboardLayoutComponent);
+    this.layoutRegistry.registerLayout('fullscreen', FullScreenLayoutComponent);
+    this.layoutRegistry.registerLayout('split', SplitViewLayoutComponent);
   }
 
   private initMenu() {
@@ -93,7 +134,9 @@ export class AppComponent {
       { id: 'admin', label: 'Admin Panel', icon: 'admin_panel_settings', route: '/admin', permission: 'Kullanici' },
       { id: 'reports', label: 'Reports', icon: 'bar_chart', route: '/reports', permission: 'Kullanici' },
       { id: 'settings', label: 'Settings', icon: 'settings', route: '/settings' },
-      { id: 'forms', label: 'Forms', icon: 'dynamic_form', route: '/forms' }
+      { id: 'forms', label: 'Forms', icon: 'dynamic_form', route: '/forms' },
+      { id: 'directives', label: 'Directives', icon: 'extension', route: '/directives' }
+
     ];
     this.menuService.setMenu(menu);
   }
@@ -102,3 +145,4 @@ export class AppComponent {
     this.auth.logout();
   }
 }
+
