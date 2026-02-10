@@ -40,6 +40,7 @@ export class AuthService implements IAuthService {
     // Reactive signals
     readonly accessToken = computed(() => this.state().accessToken);
     readonly isAuthenticated = computed(() => !!this.state().accessToken);
+    readonly expiresAt = computed(() => this.state().expiresAt);
 
     // Observable streams for legacy/async support
     readonly isAuthenticated$ = toObservable(this.isAuthenticated);

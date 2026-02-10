@@ -1,10 +1,26 @@
 import { Observable } from 'rxjs';
 
+/**
+ * Extended dialog result with metadata about how it was dismissed.
+ */
+export interface DialogResult<T = boolean> {
+    /** Whether the dialog was confirmed */
+    confirmed: boolean;
+    /** Optional data payload */
+    data?: T;
+    /** How the dialog was dismissed */
+    dismissedBy?: 'backdrop' | 'escape' | 'close-button' | 'confirm' | 'cancel';
+}
+
 export interface ConfirmOptions {
     title?: string;
     confirmText?: string;
     cancelText?: string;
     type?: 'info' | 'success' | 'warning' | 'danger';
+    /** Allow HTML content (will be sanitized) */
+    allowHtml?: boolean;
+    /** Sanitize HTML content (default: true) */
+    sanitize?: boolean;
 }
 
 export abstract class ConfirmService {
@@ -26,6 +42,10 @@ export interface ToastOptions {
     action?: string;
     horizontalPosition?: 'start' | 'center' | 'end' | 'left' | 'right';
     verticalPosition?: 'top' | 'bottom';
+    /** Allow HTML content (will be sanitized) */
+    allowHtml?: boolean;
+    /** Sanitize HTML content (default: true) */
+    sanitize?: boolean;
 }
 
 export abstract class ToastService {

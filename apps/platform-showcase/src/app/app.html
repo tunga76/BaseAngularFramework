@@ -1,0 +1,21 @@
+<div class="showcase-app">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <h1>{{ title }}</h1>
+      <p class="subtitle">Interactive Component Gallery</p>
+    </div>
+
+    <ul class="menu">
+      <li *ngFor="let item of menuItems">
+        <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.path === '/'}">
+          <span class="icon">{{ item.icon }}</span>
+          <span class="label">{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

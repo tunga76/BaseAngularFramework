@@ -1,8 +1,9 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { UiSanitizerService } from '../security/ui-sanitizer.service';
 
 @Component({
   selector: 'platform-material-dialog',
@@ -12,16 +13,25 @@ import { MatIconModule } from '@angular/material/icon';
     <div class="dialog-container">
       <div class="dialog-header__clean" [ngClass]="data.type || 'info'">
         <mat-icon>{{ getIcon() }}</mat-icon>
-        <h2 mat-dialog-title>{{ data.title }}</h2>
+        <h2 mat-dialog-title [id]="'mat-dialog-title-' + _dialogId">{{ data.title }}</h2>
       </div>
       
-      <mat-dialog-content>
-        <p>{{ data.message }}</p>
+      <mat-dialog-content [attr.aria-labelledby]="'mat-dialog-title-' + _dialogId">
+        <p [innerHTML]="safeMessage"></p>
       </mat-dialog-content>
       
       <mat-dialog-actions align="end">
-        <button mat-button *ngIf="data.showCancel" (click)="onCancel()" class="cancel-button">{{ data.cancelText || 'Cancel' }}</button>
-        <button mat-raised-button [color]="getButtonColor()" (click)="onConfirm()" class="confirm-button">{{ data.confirmText || 'OK' }}</button>
+        <button mat-button 
+                *ngIf="data.showCancel" 
+                (click)="onCancel()" 
+                class="cancel-button"
+                type="button">{{ data.cancelText || 'Cancel' }}</button>
+        <button mat-raised-button 
+                [color]="getButtonColor()" 
+                (click)="onConfirm()" 
+                class="confirm-button"
+                type="button"
+                cdkFocusInitial>{{ data.confirmText || 'OK' }}</button>
       </mat-dialog-actions>
     </div>
   `,
@@ -95,7 +105,12 @@ import { MatIconModule } from '@angular/material/icon';
     }
   `]
 })
-export class MaterialDialogComponent {
+export class MaterialDialogComponent implements OnInit {
+  safeMessage = '';
+  _dialogId = Math.random().toString(36).substring(2, 9);
+
+  private sanitizer = inject(UiSanitizerService);
+
   constructor(
     public dialogRef: MatDialogRef<MaterialDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: {
@@ -105,8 +120,15 @@ export class MaterialDialogComponent {
       confirmText?: string;
       cancelText?: string;
       type?: 'info' | 'success' | 'warning' | 'danger';
+      allowHtml?: boolean;
     }
   ) { }
+
+  ngOnInit(): void {
+    // Sanitize message for XSS protection
+    const allowHtml = this.data.allowHtml ?? false;
+    this.safeMessage = this.sanitizer.sanitize(this.data.message, allowHtml);
+  }
 
   onCancel(): void {
     this.dialogRef.close(false);

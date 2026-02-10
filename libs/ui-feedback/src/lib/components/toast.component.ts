@@ -1,20 +1,21 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { UiSanitizerService } from '../security/ui-sanitizer.service';
 
 @Component({
-    selector: 'platform-toast',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
-    <div class="toast-container">
-      <div class="toast" [class]="type">
+  selector: 'platform-toast',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <div class="toast-container" role="status" aria-live="polite" aria-atomic="true">
+      <div class="toast" [class]="type" role="alert">
         <div class="toast-content">
-          <span class="message">{{ message }}</span>
+          <span class="message" [innerHTML]="safeMessage"></span>
         </div>
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .toast-container {
       position: fixed;
       bottom: 2rem;
@@ -46,7 +47,17 @@ import { CommonModule } from '@angular/common';
     }
   `]
 })
-export class ToastComponent {
-    @Input() message = '';
-    @Input() type: 'success' | 'error' | 'info' | 'warning' = 'info';
+export class ToastComponent implements OnInit {
+  @Input() message = '';
+  @Input() type: 'success' | 'error' | 'info' | 'warning' = 'info';
+  @Input() allowHtml = false;
+
+  safeMessage = '';
+
+  private sanitizer = inject(UiSanitizerService);
+
+  ngOnInit(): void {
+    // Sanitize message for XSS protection
+    this.safeMessage = this.sanitizer.sanitize(this.message, this.allowHtml);
+  }
 }
