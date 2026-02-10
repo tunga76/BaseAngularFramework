@@ -1,4 +1,4 @@
-import { Directive, Input, TemplateRef, ViewContainerRef, inject } from '@angular/core';
+import { Directive, Input, TemplateRef, ViewContainerRef, inject, effect } from '@angular/core';
 import { AuthService } from '../auth.service';
 
 @Directive({
@@ -10,13 +10,26 @@ export class IfRoleDirective {
     private viewContainer = inject(ViewContainerRef);
     private authService = inject(AuthService);
 
+    private rolesToCheck: string[] = [];
+
+    constructor() {
+        effect(() => {
+            this.authService.getPermissions();
+            this.updateView();
+        });
+    }
+
     @Input() set ifRole(role: string | string[]) {
-        const userRolesResult = this.authService.getPermissions(); // Assuming getPermissions includes roles
-        const rolesToCheck = Array.isArray(role) ? role : [role];
+        this.rolesToCheck = Array.isArray(role) ? role : [role];
+        this.updateView();
+    }
 
-        const hasRole = rolesToCheck.some(r => userRolesResult.includes(r));
-
+    private updateView() {
         this.viewContainer.clear();
+
+        const userRolesResult = this.authService.getPermissions();
+        const hasRole = this.rolesToCheck.some(r => userRolesResult.includes(r));
+
         if (hasRole) {
             this.viewContainer.createEmbeddedView(this.templateRef);
         }

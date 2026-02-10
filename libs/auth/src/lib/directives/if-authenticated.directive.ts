@@ -1,32 +1,38 @@
-import { Directive, Input, TemplateRef, ViewContainerRef, inject, OnInit } from '@angular/core';
+import { Directive, Input, TemplateRef, ViewContainerRef, inject, effect } from '@angular/core';
 import { AuthService } from '../auth.service';
 
 @Directive({
     selector: '[ifAuthenticated]',
     standalone: true
 })
-export class IfAuthenticatedDirective implements OnInit {
+export class IfAuthenticatedDirective {
     private templateRef = inject(TemplateRef<any>);
     private viewContainer = inject(ViewContainerRef);
     private authService = inject(AuthService);
 
+    private condition = true;
+
+    constructor() {
+        effect(() => {
+            const isAuthenticated = this.authService.isAuthenticated();
+            this.updateView(isAuthenticated);
+        });
+    }
+
     @Input() set ifAuthenticated(shouldBeAuthenticated: boolean) {
-        this.updateView(shouldBeAuthenticated);
+        this.condition = shouldBeAuthenticated;
+        // Trigger manual update in case only input changed and signal didn't
+        // But simpler: just rely on effect if signal changes. 
+        // If input changes, we should re-evaluate. 
+        // Since we can't easily trigger effect from input change without a signal input,
+        // we call updateView manually here with current signal value.
+        this.updateView(this.authService.isAuthenticated());
     }
 
-    ngOnInit() {
-        // Default to checking if authenticated (true) if no value provided
-        if (this.viewContainer.length === 0) {
-            this.updateView(true);
-        }
-    }
-
-    private updateView(shouldBeAuthenticated: boolean) {
+    private updateView(isAuthenticated: boolean) {
         this.viewContainer.clear();
 
-        const isAuthenticated = this.authService.isAuthenticated();
-
-        if (isAuthenticated === shouldBeAuthenticated) {
+        if (isAuthenticated === this.condition) {
             this.viewContainer.createEmbeddedView(this.templateRef);
         }
     }

@@ -20,13 +20,14 @@ export function provideCore(config: CoreConfig): EnvironmentProviders {
             provide: STORAGE_ENCRYPTION_KEY,
             useValue: config.storageSecret || 'default-secret-key'
         },
+        // Provide LocalStorageService so strict DI (PLATFORM_ID) works
+        LocalStorageService,
         {
             provide: STORAGE_SERVICE,
-            useFactory: () => {
-                const baseStorage = new LocalStorageService();
-                const secretKey = inject(STORAGE_ENCRYPTION_KEY);
+            useFactory: (baseStorage: LocalStorageService, secretKey: string) => {
                 return new EncryptedStorageService(baseStorage, secretKey);
-            }
+            },
+            deps: [LocalStorageService, STORAGE_ENCRYPTION_KEY]
         },
         provideHttpClient(
             withInterceptors([

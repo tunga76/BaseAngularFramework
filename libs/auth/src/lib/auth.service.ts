@@ -1,7 +1,9 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { BehaviorSubject, Observable, of, throwError, firstValueFrom } from 'rxjs';
+import { catchError, map, tap, finalize } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AUTH_CONFIG } from './auth-config';
 import { ApiClient, STORAGE_SERVICE, LOGGER_SERVICE, InactivityService } from '@platform/core';
 import { generateCodeChallenge, generateCodeVerifier, generateState } from './pkce.utils';
@@ -14,6 +16,8 @@ export interface AuthState {
     userClaims: any | null;
 }
 
+const AUTH_STATE_KEY = 'platform_auth_state';
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
     private config = inject(AUTH_CONFIG);
@@ -22,6 +26,8 @@ export class AuthService {
     private storage = inject(STORAGE_SERVICE);
     private logger = inject(LOGGER_SERVICE);
     private inactivity = inject(InactivityService, { optional: true });
+    private document = inject(DOCUMENT);
+    private platformId = inject(PLATFORM_ID);
 
     private state = signal<AuthState>({
         accessToken: null,
@@ -31,52 +37,64 @@ export class AuthService {
         userClaims: null
     });
 
+    // Reactive signals
+    readonly accessToken = computed(() => this.state().accessToken);
+    readonly isAuthenticated = computed(() => !!this.state().accessToken);
+
+    // Observable streams for legacy/async support
+    readonly isAuthenticated$ = toObservable(this.isAuthenticated);
+
     private refreshInProgress$: Observable<any> | null = null;
 
     constructor() {
-        this.inactivity?.timeout$.subscribe(() => {
-            this.logger.info('Inactivity timeout reached, logging out...');
-            this.logout();
-        });
+        this.loadState();
+
+        if (this.inactivity) {
+            this.inactivity.timeout$.subscribe(() => {
+                this.logger.info('Inactivity timeout reached, logging out...');
+                this.logout();
+            });
+        }
     }
 
-    readonly accessToken = () => this.state().accessToken;
-    readonly isAuthenticated = () => !!this.state().accessToken;
-
-    isAuthenticated$(): Observable<boolean> {
-        return of(this.isAuthenticated());
+    private loadState(): void {
+        const savedState = this.storage.getObject<AuthState>(AUTH_STATE_KEY);
+        if (savedState) {
+            this.state.set(savedState);
+            this.logger.debug('[Auth] State loaded from storage');
+        }
     }
 
     getAccessToken(): Observable<string | null> {
+        // Return as observable from signal for consistency, but logic for expiry check remains
         const state = this.state();
         if (!state.accessToken) {
             return of(null);
         }
 
         const now = Date.now();
-        const timeLeftMs = state.expiresAt ? state.expiresAt - now : 0;
-        const timeLeftSec = Math.floor(timeLeftMs / 1000);
-
-        // Buffer time: 30 seconds
+        // Check if token is invalid or about to expire
         const isExpired = state.expiresAt && (now + 30000) > state.expiresAt;
 
         if (isExpired) {
-            this.logger.info(`[Auth] Token is expiring in ${timeLeftSec}s (Buffer: 30s). Triggering refresh...`);
+            const timeLeftSec = state.expiresAt ? Math.floor((state.expiresAt - now) / 1000) : 0;
+            this.logger.info(`[Auth] Token is expiring/expired (Left: ${timeLeftSec}s). Triggering refresh...`);
             if (state.refreshToken) {
                 return this.refresh();
             } else {
                 this.logger.warn('[Auth] Token expired but no refresh token available.');
             }
-        } else {
-            // Only log every few calls or if specifically debugging to avoid console noise, 
-            // but since user asked for monitoring, let's log it.
-            this.logger.debug(`[Auth] Access Token valid. Time left: ${timeLeftSec}s`);
         }
 
         return of(state.accessToken);
     }
 
     async login(): Promise<void> {
+        if (!isPlatformBrowser(this.platformId)) {
+            this.logger.warn('[Auth] Login called on server (SSR). Ignoring.');
+            return;
+        }
+
         const verifier = await generateCodeVerifier();
         const state = generateState();
 
@@ -95,22 +113,23 @@ export class AuthService {
             state: state
         });
 
-        window.location.href = `${this.config.issuer}/authorize?${params.toString()}`;
+        this.document.location.href = `${this.config.issuer}/authorize?${params.toString()}`;
     }
 
     handleRedirectCallback(): Observable<boolean> {
-        const params = new URLSearchParams(window.location.search);
+        if (!isPlatformBrowser(this.platformId)) return of(false);
+
+        const params = new URLSearchParams(this.document.location.search);
         const code = params.get('code');
         const state = params.get('state');
         const storedState = this.storage.getItem('pkce_state');
         const verifier = this.storage.getItem('pkce_verifier');
 
         if (!code || state !== storedState || !verifier) {
+            this.storage.removeItem('pkce_state');
+            this.storage.removeItem('pkce_verifier');
             return of(false);
         }
-
-        this.storage.removeItem('pkce_state');
-        this.storage.removeItem('pkce_verifier');
 
         const body = new HttpParams()
             .set('grant_type', 'authorization_code')
@@ -127,6 +146,10 @@ export class AuthService {
             catchError(err => {
                 this.logger.error('Auth callback failed', err);
                 return of(false);
+            }),
+            finalize(() => {
+                this.storage.removeItem('pkce_state');
+                this.storage.removeItem('pkce_verifier');
             })
         );
     }
@@ -169,8 +192,10 @@ export class AuthService {
 
     logout(): void {
         this.state.set({ accessToken: null, idToken: null, refreshToken: null, expiresAt: null, userClaims: null });
-        if (this.config.postLogoutRedirectUri) {
-            window.location.href = `${this.config.issuer}/logout?post_logout_redirect_uri=${encodeURIComponent(this.config.postLogoutRedirectUri)}`;
+        this.storage.removeItem(AUTH_STATE_KEY);
+
+        if (isPlatformBrowser(this.platformId) && this.config.postLogoutRedirectUri) {
+            this.document.location.href = `${this.config.issuer}/logout?post_logout_redirect_uri=${encodeURIComponent(this.config.postLogoutRedirectUri)}`;
         }
     }
 
@@ -180,7 +205,6 @@ export class AuthService {
 
     /**
      * Helper to get all permissions and roles from the current user claims.
-     * Supports both 'permissions' and 'role' (or 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role') claims.
      */
     getPermissions(): string[] {
         const claims = this.getUserClaims();
@@ -190,7 +214,6 @@ export class AuthService {
             if (!claim) return [];
             if (Array.isArray(claim)) return claim;
             if (typeof claim === 'string') {
-                // Handle stringified JSON arrays like polnet_roles: "[\"Role1\", \"Role2\"]"
                 if (claim.trim().startsWith('[') && claim.trim().endsWith(']')) {
                     try {
                         return JSON.parse(claim);
@@ -213,38 +236,40 @@ export class AuthService {
 
     private updateState(response: any): void {
         const expiresAt = Date.now() + (response.expires_in * 1000);
-        const expiresInMin = Math.floor(response.expires_in / 60);
 
-        // Try to get claims from ID Token first, then Access Token. 
-        // Some providers put roles in Access Token, some in ID Token.
+        // Try to get claims from ID Token first, then Access Token.
         const idTokenClaims = response.id_token ? this.decodeToken(response.id_token) : null;
         const accessTokenClaims = response.access_token ? this.decodeToken(response.access_token) : null;
 
-        // Merge claims, giving priority to Access Token claims if they contain roles 
-        // because IdentityServer typically puts roles there.
         const mergedClaims = { ...(idTokenClaims || {}), ...(accessTokenClaims || {}) };
 
-        this.logger.info(`[Auth] Token acquired/refreshed. Valid for ${response.expires_in}s (~${expiresInMin} min). Expires at: ${new Date(expiresAt).toLocaleTimeString()}`);
+        this.logger.info(`[Auth] Token acquired. Expires at: ${new Date(expiresAt).toLocaleTimeString()}`);
 
-        this.state.set({
+        const newState: AuthState = {
             accessToken: response.access_token,
             idToken: response.id_token,
             refreshToken: response.refresh_token || this.state().refreshToken,
             expiresAt: expiresAt,
             userClaims: mergedClaims
-        });
+        };
+
+        this.state.set(newState);
+        this.storage.setObject(AUTH_STATE_KEY, newState);
     }
 
     private decodeToken(token: string): any {
+        if (!isPlatformBrowser(this.platformId)) return null;
+
         try {
             const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            // Solution for UTF-8 characters in Base64:
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => {
+            // Safe decoding for UTF-8
+            const jsonPayload = decodeURIComponent(window.atob(base64).split('').map((c) => {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
             return JSON.parse(jsonPayload);
         } catch (e) {
+            this.logger.warn('[Auth] Failed to decode token', undefined, e);
             return null;
         }
     }

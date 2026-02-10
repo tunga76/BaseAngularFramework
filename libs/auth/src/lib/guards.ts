@@ -6,11 +6,12 @@ export const authGuard: CanActivateFn = () => {
     const authService = inject(AuthService);
     const router = inject(Router);
 
+    // Using the reactive signal/getter
     if (authService.isAuthenticated()) {
         return true;
     }
 
-    // Optionally store current URL and redirect to login
+    // Redirect to login via service handler
     authService.login();
     return false;
 };
@@ -23,7 +24,6 @@ export function permissionGuard(requiredPermissions: string | string[]): CanActi
 
         const permissionsToCheck = Array.isArray(requiredPermissions) ? requiredPermissions : [requiredPermissions];
 
-        // Kullanıcının yetkilerinden EN AZ BİRİ istenen yetkiler arasında var mı?
         const hasPermission = permissionsToCheck.some(permission => userPermissions.includes(permission));
 
         if (hasPermission) {
