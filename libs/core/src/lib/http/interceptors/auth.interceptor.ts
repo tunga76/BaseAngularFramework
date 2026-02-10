@@ -8,6 +8,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     // but auth interceptor suggests auth is mandatory/configured if used.
     const authService = inject(AUTH_SERVICE);
 
+    // If the auth service says we shouldn't intercept this request (e.g., auth endpoints), skip it.
+    if (authService.shouldIntercept && !authService.shouldIntercept(req.url)) {
+        return next(req);
+    }
+
     return authService.getAccessToken().pipe(
         switchMap(token => {
             let authReq = req;

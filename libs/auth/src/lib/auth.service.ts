@@ -5,7 +5,7 @@ import { BehaviorSubject, Observable, of, throwError, firstValueFrom } from 'rxj
 import { catchError, map, tap, finalize } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AUTH_CONFIG } from './auth-config';
-import { ApiClient, STORAGE_SERVICE, LOGGER_SERVICE, InactivityService } from '@platform/core';
+import { ApiClient, STORAGE_SERVICE, LOGGER_SERVICE, InactivityService, IAuthService } from '@platform/core';
 import { generateCodeChallenge, generateCodeVerifier, generateState } from './pkce.utils';
 
 export interface AuthState {
@@ -19,7 +19,7 @@ export interface AuthState {
 const AUTH_STATE_KEY = 'platform_auth_state';
 
 @Injectable({ providedIn: 'root' })
-export class AuthService {
+export class AuthService implements IAuthService {
     private config = inject(AUTH_CONFIG);
     private apiClient = inject(ApiClient);
     private http = inject(HttpClient);
@@ -197,6 +197,14 @@ export class AuthService {
         if (isPlatformBrowser(this.platformId) && this.config.postLogoutRedirectUri) {
             this.document.location.href = `${this.config.issuer}/logout?post_logout_redirect_uri=${encodeURIComponent(this.config.postLogoutRedirectUri)}`;
         }
+    }
+
+    shouldIntercept(url: string): boolean {
+        // We should NOT intercept (skip) if it's the token or authorize endpoint of our issuer
+        const isAuthRequest = url.startsWith(this.config.issuer) &&
+            (url.includes('/token') || url.includes('/authorize'));
+
+        return !isAuthRequest;
     }
 
     getUserClaims(): any {

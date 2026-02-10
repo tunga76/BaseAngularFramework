@@ -5,6 +5,7 @@ export interface IAuthService {
     getAccessToken(): Observable<string | null>;
     refresh(): Observable<string>;
     logout(): void;
+    shouldIntercept(url: string): boolean;
 }
 
 export const AUTH_SERVICE = new InjectionToken<IAuthService>('AUTH_SERVICE');

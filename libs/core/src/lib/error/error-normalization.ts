@@ -45,6 +45,7 @@ export function normalizeError(error: any): NormalizedError {
                     break;
                 case 401:
                     errorCode = 'UNAUTHORIZED';
+                    errorMessage = 'Your session has expired. Please log in again.';
                     break;
                 case 403:
                     errorCode = 'FORBIDDEN';
