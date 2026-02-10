@@ -15,13 +15,18 @@ export const authGuard: CanActivateFn = () => {
     return false;
 };
 
-export function permissionGuard(requiredPermission: string): CanActivateFn {
+export function permissionGuard(requiredPermissions: string | string[]): CanActivateFn {
     return () => {
         const authService = inject(AuthService);
         const router = inject(Router);
-        const permissions = authService.getPermissions();
+        const userPermissions = authService.getPermissions();
 
-        if (permissions.includes(requiredPermission)) {
+        const permissionsToCheck = Array.isArray(requiredPermissions) ? requiredPermissions : [requiredPermissions];
+
+        // Kullanıcının yetkilerinden EN AZ BİRİ istenen yetkiler arasında var mı?
+        const hasPermission = permissionsToCheck.some(permission => userPermissions.includes(permission));
+
+        if (hasPermission) {
             return true;
         }
 
