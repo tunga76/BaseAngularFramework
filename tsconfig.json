@@ -61,21 +61,5 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true
   },
-  "references": [
-    {
-      "path": "./libs/ui-platform/tsconfig.lib.json"
-    },
-    {
-      "path": "./libs/ui-platform/tsconfig.spec.json"
-    },
-    {
-      "path": "./apps/platform-showcase/tsconfig.app.json"
-    },
-    {
-      "path": "./apps/auth-showcase/tsconfig.app.json"
-    },
-    {
-      "path": "./apps/core-showcase/tsconfig.app.json"
-    }
-  ]
+  "references": []
 }

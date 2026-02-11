@@ -1,9 +1,0 @@
-[data-theme='light'] {
-    --theme-bg: #f8fafc;
-    --theme-paper: #ffffff;
-    --theme-border: #e2e8f0;
-    --theme-text-main: #0f172a;
-    --theme-text-muted: #64748b;
-
-    --overlay-bg: rgba(0, 0, 0, 0.5);
-}

@@ -18,5 +18,6 @@ export const routes: Routes = [
     { path: 'spinner', component: SpinnerShowcaseComponent },
     { path: 'modal', component: ModalShowcaseComponent },
     { path: 'dropdown', component: DropdownShowcaseComponent },
-    { path: 'layouts', component: LayoutsShowcaseComponent }
+    { path: 'layouts', component: LayoutsShowcaseComponent },
+    { path: 'passenger-registration', loadComponent: () => import('./passenger-registration/passenger-registration.component').then(m => m.PassengerRegistrationComponent) }
 ];

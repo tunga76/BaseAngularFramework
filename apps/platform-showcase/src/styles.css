@@ -1,10 +1,12 @@
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
 * {
     box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
 /* CSS Custom Properties for UI Platform */
@@ -98,4 +100,22 @@ body {
 
 .code-block pre {
     margin: 0;
+}
+
+/* Modal specific overrides if needed */
+::ng-deep .platform-modal-panel .mat-mdc-dialog-surface {
+    border-radius: var(--radius-md, 8px) !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+}
+
+::ng-deep .platform-modal-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+[modal-footer] platform-button {
+    margin-left: 8px;
 }

@@ -1,5 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, HostListener, PLATFORM_ID, Inject } from '@angular/core';
-import { CommonModule, isPlatformBrowser, DOCUMENT } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnDestroy, TemplateRef, ViewChild, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 
 /**
  * Modal dialog component with backdrop, animations, and focus management.
@@ -29,84 +31,50 @@ import { CommonModule, isPlatformBrowser, DOCUMENT } from '@angular/common';
  * ```
  */
 @Component({
-    selector: 'platform-modal',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
-    <div *ngIf="open" class="modal-backdrop" 
-         (click)="handleBackdropClick()"
-         [@fadeIn]>
-      <div class="modal-container" 
-           [class]="'modal-' + size"
-           (click)="$event.stopPropagation()"
-           role="dialog"
-           [attr.aria-modal]="true"
-           [attr.aria-labelledby]="title ? 'modal-title' : null"
-           [@slideIn]>
-        
-        <div class="modal-header" *ngIf="title || showCloseButton">
-          <h2 *ngIf="title" id="modal-title" class="modal-title">
-            {{ title }}
-          </h2>
-          <button 
-            *ngIf="showCloseButton"
-            type="button"
-            class="modal-close"
-            (click)="close()"
-            aria-label="Close modal">
-            ✕
-          </button>
-        </div>
-
-        <div class="modal-content">
-          <ng-content select="[modal-content]"></ng-content>
-          <ng-content></ng-content>
-        </div>
-
-        <div class="modal-footer" *ngIf="hasFooter">
-          <ng-content select="[modal-footer]"></ng-content>
-        </div>
+  selector: 'platform-modal',
+  standalone: true,
+  imports: [CommonModule, MatDialogModule, MatButtonModule],
+  template: `
+    <ng-template #modalTemplate>
+      <div class="modal-header" [class]="'modal-header-' + variant" *ngIf="title || showCloseButton">
+        <h2 *ngIf="title" mat-dialog-title class="modal-title">
+          {{ title }}
+        </h2>
+        <button 
+          *ngIf="showCloseButton"
+          type="button"
+          class="modal-close"
+          (click)="close()"
+          aria-label="Close modal">
+          ✕
+        </button>
       </div>
-    </div>
+
+      <div mat-dialog-content class="modal-content">
+        <ng-content select="[modal-content]"></ng-content>
+        <ng-content></ng-content>
+      </div>
+
+      <div mat-dialog-actions class="modal-footer" *ngIf="hasFooter">
+        <ng-content select="[modal-footer]"></ng-content>
+      </div>
+    </ng-template>
   `,
-    styles: [`
-    .modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 16px;
-    }
-
-    .modal-container {
-      background-color: var(--color-surface, #ffffff);
-      border-radius: var(--radius-md, 8px);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
-                  0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      max-height: 90vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .modal-sm { width: 400px; max-width: 100%; }
-    .modal-md { width: 600px; max-width: 100%; }
-    .modal-lg { width: 800px; max-width: 100%; }
-    .modal-xl { width: 1000px; max-width: 100%; }
-
+  styles: [`
     .modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 24px;
+      padding: 12px 20px;
       border-bottom: 1px solid var(--color-border, #e5e7eb);
+      min-height: 56px;
     }
+    
+    .modal-header-default { background-color: transparent; }
+    .modal-header-info { background-color: var(--color-info-bg, #eff6ff); border-bottom-color: var(--color-info-border, #bfdbfe); }
+    .modal-header-success { background-color: var(--color-success-bg, #f0fdf4); border-bottom-color: var(--color-success-border, #bbf7d0); }
+    .modal-header-warning { background-color: var(--color-warning-bg, #fefce8); border-bottom-color: var(--color-warning-border, #fde047); }
+    .modal-header-error { background-color: var(--color-error-bg, #fef2f2); border-bottom-color: var(--color-error-border, #fecaca); }
 
     .modal-title {
       font-size: var(--font-size-lg, 18px);
@@ -115,15 +83,22 @@ import { CommonModule, isPlatformBrowser, DOCUMENT } from '@angular/common';
       margin: 0;
     }
 
+    .modal-header-info .modal-title { color: var(--color-info-text, #1e40af); }
+    .modal-header-success .modal-title { color: var(--color-success-text, #166534); }
+    .modal-header-warning .modal-title { color: var(--color-warning-text, #854d0e); }
+    .modal-header-error .modal-title { color: var(--color-error-text, #991b1b); }
+
     .modal-close {
       background: none;
       border: none;
-      padding: 4px 8px;
+      padding: 4px;
       cursor: pointer;
       font-size: 20px;
       color: var(--color-text-muted, #6b7280);
       border-radius: var(--radius-md, 4px);
       transition: all var(--transition-fast, 0.15s ease);
+      margin-left: auto;
+      line-height: 1;
     }
 
     .modal-close:hover {
@@ -131,15 +106,10 @@ import { CommonModule, isPlatformBrowser, DOCUMENT } from '@angular/common';
       color: var(--color-text, #374151);
     }
 
-    .modal-close:focus-visible {
-      outline: 2px solid var(--color-primary, #3b82f6);
-      outline-offset: 2px;
-    }
-
     .modal-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px;
+      padding: 0 !important;
+      margin: 0 !important;
+      max-height: 70vh !important;
     }
 
     .modal-footer {
@@ -147,68 +117,105 @@ import { CommonModule, isPlatformBrowser, DOCUMENT } from '@angular/common';
       align-items: center;
       justify-content: flex-end;
       gap: 12px;
-      padding: 16px 24px;
-      border-top: 1px solid var(--color-border, #e5e7eb);
-      background-color: var(--color-background, #f9fafb);
+      padding: 16px 0 0 0;
+      margin: 0;
     }
-  `],
-    animations: []
+
+    ::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+        padding: 24px !important;
+        border-radius: var(--radius-md, 8px) !important;
+    }
+  `]
 })
-export class ModalComponent implements OnInit, OnDestroy {
-    /** Whether the modal is open */
-    @Input() open = false;
+export class ModalComponent implements OnChanges, OnDestroy, AfterViewInit {
+  @Input() open = false;
+  @Input() title?: string;
+  @Input() variant: 'default' | 'info' | 'success' | 'warning' | 'error' = 'default';
+  @Input() size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
+  @Input() showCloseButton = true;
+  @Input() closeOnBackdropClick = true;
+  @Input() closeOnEscape = true;
+  @Output() onClose = new EventEmitter<void>();
 
-    /** Modal title */
-    @Input() title?: string;
+  @ViewChild('modalTemplate') modalTemplate!: TemplateRef<any>;
 
-    /** Modal size */
-    @Input() size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
+  private dialogRef?: MatDialogRef<any>;
+  hasFooter = true;
 
-    /** Whether to show close button */
-    @Input() showCloseButton = true;
+  constructor(private dialog: MatDialog) { }
 
-    /** Whether clicking backdrop closes modal */
-    @Input() closeOnBackdropClick = true;
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['open'] && !changes['open'].firstChange) {
+      if (this.open) {
+        this.openDialog();
+      } else {
+        this.closeDialog();
+      }
+    }
+  }
 
-    /** Whether pressing Escape closes modal */
-    @Input() closeOnEscape = true;
+  ngAfterViewInit(): void {
+    if (this.open) {
+      this.openDialog();
+    }
+  }
 
-    /** Emitted when modal is closed */
-    @Output() onClose = new EventEmitter<void>();
+  ngOnDestroy(): void {
+    this.closeDialog();
+  }
 
-    hasFooter = true;
-
-    constructor(
-        @Inject(DOCUMENT) private document: Document,
-        @Inject(PLATFORM_ID) private platformId: Object
-    ) { }
-
-    ngOnInit(): void {
-        if (this.open && isPlatformBrowser(this.platformId)) {
-            this.document.body.style.overflow = 'hidden';
-        }
+  private openDialog(): void {
+    if (this.dialogRef || !this.modalTemplate) {
+      return;
     }
 
-    ngOnDestroy(): void {
-        if (isPlatformBrowser(this.platformId)) {
-            this.document.body.style.overflow = '';
-        }
-    }
+    const widthMap = {
+      sm: '400px',
+      md: '600px',
+      lg: '800px',
+      xl: '1000px'
+    };
 
-    @HostListener('window:keydown.escape')
-    onEscape(): void {
-        if (this.open && this.closeOnEscape) {
-            this.close();
-        }
-    }
+    this.dialogRef = this.dialog.open(this.modalTemplate, {
+      width: widthMap[this.size],
+      disableClose: !this.closeOnBackdropClick && !this.closeOnEscape,
+      panelClass: 'platform-modal-panel',
+      hasBackdrop: true
+    });
 
-    handleBackdropClick(): void {
-        if (this.closeOnBackdropClick) {
-            this.close();
-        }
-    }
-
-    close(): void {
+    this.dialogRef.afterClosed().subscribe(() => {
+      this.dialogRef = undefined;
+      // Only emit if it was closed by backdrop or escape (implicitly),
+      // or if we need to sync the parent's state.
+      // If the parent is strictly controlling 'open', we should emit onClose so it can set open = false.
+      if (this.open) {
         this.onClose.emit();
+      }
+    });
+
+    // Handle backdrop click and escape key manually if needed for finer control,
+    // but MatDialog handles them via disableClose configuration mostly.
+    // However, MatDialog treats 'disableClose: true' as "neither backdrop nor escape closes it".
+    // If we want mixed behavior (e.g. escape works but backdrop doesn't), we need custom handling or
+    // use the 'closeOnNavigation' etc.
+    // For now, mapping 'disableClose' to strict negation of both is a simplification.
+    // Let's refine:
+
+    this.dialogRef.disableClose = !this.closeOnBackdropClick;
+
+    // We can hook into keyboard events on the dialog ref if we needed specific Escape handling separate from backdrop.
+    // But standard MatDialog behavior is usually sufficient.
+  }
+
+  private closeDialog(): void {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+      this.dialogRef = undefined;
     }
+  }
+
+  close(): void {
+    this.closeDialog();
+    this.onClose.emit();
+  }
 }
