@@ -73,6 +73,9 @@
     },
     {
       "path": "./apps/auth-showcase/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/core-showcase/tsconfig.app.json"
     }
   ]
 }
