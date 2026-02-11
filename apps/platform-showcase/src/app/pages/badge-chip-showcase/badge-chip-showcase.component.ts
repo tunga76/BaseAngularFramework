@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { BadgeComponent, ChipComponent } from '@platform/ui-platform';
 
 @Component({
-    selector: 'app-badge-chip-showcase',
-    standalone: true,
-    imports: [CommonModule, BadgeComponent, ChipComponent],
-    template: `
+  selector: 'app-badge-chip-showcase',
+  standalone: true,
+  imports: [CommonModule, BadgeComponent, ChipComponent],
+  template: `
     <div class="showcase-page">
       <div class="page-header">
         <h1 class="page-title">Badge & Chip Components</h1>
@@ -18,11 +18,11 @@ import { BadgeComponent, ChipComponent } from '@platform/ui-platform';
         <div class="demo-container">
           <div class="demo-row">
             <platform-badge variant="primary">Primary</platform-badge>
-            <platform-badge variant="success">Success</platform-badge>
-            <platform-badge variant="warning">Warning</platform-badge>
+            <platform-badge variant="secondary">Secondary</platform-badge>
+            <platform-badge variant="outline">Outline</platform-badge>
             <platform-badge variant="danger">Danger</platform-badge>
-            <platform-badge variant="info">Info</platform-badge>
-            <platform-badge variant="neutral">Neutral</platform-badge>
+            <platform-badge variant="ghost">Ghost</platform-badge>
+            <platform-badge variant="flat">Flat</platform-badge>
           </div>
         </div>
       </div>
@@ -42,8 +42,8 @@ import { BadgeComponent, ChipComponent } from '@platform/ui-platform';
         <h2 class="section-title">Dot Badges</h2>
         <div class="demo-container">
           <div class="demo-row">
-            <platform-badge variant="success" [dot]="true"></platform-badge>
-            <platform-badge variant="warning" [dot]="true"></platform-badge>
+            <platform-badge variant="primary" [dot]="true"></platform-badge>
+            <platform-badge variant="outline" [dot]="true"></platform-badge>
             <platform-badge variant="danger" [dot]="true"></platform-badge>
           </div>
         </div>
@@ -90,9 +90,9 @@ import { BadgeComponent, ChipComponent } from '@platform/ui-platform';
   `
 })
 export class BadgeChipShowcaseComponent {
-    tags = ['JavaScript', 'TypeScript', 'Angular', 'React', 'Vue'];
+  tags = ['JavaScript', 'TypeScript', 'Angular', 'React', 'Vue'];
 
-    removeTag(tag: string) {
-        this.tags = this.tags.filter(t => t !== tag);
-    }
+  removeTag(tag: string) {
+    this.tags = this.tags.filter(t => t !== tag);
+  }
 }

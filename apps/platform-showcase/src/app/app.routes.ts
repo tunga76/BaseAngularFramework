@@ -19,5 +19,6 @@ export const routes: Routes = [
     { path: 'modal', component: ModalShowcaseComponent },
     { path: 'dropdown', component: DropdownShowcaseComponent },
     { path: 'layouts', component: LayoutsShowcaseComponent },
+    { path: 'kitchen-sink', loadComponent: () => import('./pages/kitchen-sink/kitchen-sink.component').then(m => m.KitchenSinkComponent) },
     { path: 'passenger-registration', loadComponent: () => import('./passenger-registration/passenger-registration.component').then(m => m.PassengerRegistrationComponent) }
 ];

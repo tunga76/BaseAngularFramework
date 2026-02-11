@@ -1,145 +1,83 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { BaseUiComponent } from '../../core/base-component';
 
-/**
- * Badge component for displaying status, counts, or labels.
- * 
- * Features:
- * - Multiple variants (primary, success, warning, danger, info)
- * - Different sizes
- * - Dot variant for minimal display
- * 
- * @example
- * ```html
- * <platform-badge variant="success">Active</platform-badge>
- * <platform-badge variant="danger">3</platform-badge>
- * <platform-badge [dot]="true"></platform-badge>
- * ```
- */
 @Component({
-    selector: 'platform-badge',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
-    <span 
-      [class]="getBadgeClasses()"
-      [attr.aria-label]="ariaLabel"
-      role="status">
-      <span *ngIf="!dot" class="badge-content">
-        <ng-content></ng-content>
-      </span>
+  selector: 'platform-badge',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <span class="badge" 
+          [class]="getBadgeClasses()"
+          [class.badge-dot]="dot">
+      <ng-content></ng-content>
     </span>
   `,
-    styles: [`
+  styles: [`
+    :host {
+      display: inline-flex;
+      vertical-align: middle;
+    }
     .badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-weight: 500;
-      font-family: inherit;
-      border-radius: var(--radius-md, 12px);
+      padding: 0.125rem 0.5rem;
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      font-weight: var(--font-medium);
+      line-height: 1;
       white-space: nowrap;
-      transition: all var(--transition-fast, 0.15s ease);
+    }
+    
+    /* Variants */
+    .badge-primary {
+      background-color: var(--color-primary);
+      color: var(--color-primary-contrast);
+    }
+    
+    .badge-secondary {
+      background-color: var(--color-secondary);
+      color: var(--color-secondary-contrast);
+    }
+    
+    .badge-outline {
+      background-color: transparent;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+    
+    .badge-danger {
+      background-color: var(--color-error);
+      color: white;
+    }
+    
+    .badge-ghost {
+      background-color: var(--color-surface-200);
+      color: var(--color-text-secondary);
     }
 
     /* Sizes */
-    .badge-sm {
-      padding: 2px 8px;
-      font-size: var(--font-size-xs, 10px);
-      min-height: 18px;
-    }
-
-    .badge-md {
-      padding: 4px 10px;
-      font-size: var(--font-size-sm, 12px);
-      min-height: 22px;
-    }
-
-    .badge-lg {
-      padding: 6px 12px;
-      font-size: var(--font-size-md, 14px);
-      min-height: 26px;
-    }
-
-    /* Variants */
-    .badge-primary {
-      background-color: #dbeafe;
-      color: #1e40af;
-    }
-
-    .badge-success {
-      background-color: #d1fae5;
-      color: #065f46;
-    }
-
-    .badge-warning {
-      background-color: #fef3c7;
-      color: #92400e;
-    }
-
-    .badge-danger {
-      background-color: #fee2e2;
-      color: #991b1b;
-    }
-
-    .badge-info {
-      background-color: #e0e7ff;
-      color: #3730a3;
-    }
-
-    .badge-neutral {
-      background-color: var(--color-background, #f3f4f6);
-      color: var(--color-text, #374151);
-    }
-
-    /* Dot variant */
+    .badge-sm { font-size: 0.625rem; padding: 2px 4px; }
+    .badge-md { font-size: 0.75rem; padding: 2px 8px; }
+    .badge-lg { font-size: 0.875rem; padding: 4px 10px; }
+    
+    /* Dot Badge */
     .badge-dot {
       width: 8px;
       height: 8px;
-      min-height: 8px;
       padding: 0;
       border-radius: 50%;
+      min-width: 8px;
     }
-
-    .badge-dot.badge-primary {
-      background-color: #3b82f6;
-    }
-
-    .badge-dot.badge-success {
-      background-color: #10b981;
-    }
-
-    .badge-dot.badge-warning {
-      background-color: #f59e0b;
-    }
-
-    .badge-dot.badge-danger {
-      background-color: #ef4444;
-    }
-
-    .badge-dot.badge-info {
-      background-color: #6366f1;
-    }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BadgeComponent {
-    /** Badge variant */
-    @Input() variant: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'neutral' = 'neutral';
+export class BadgeComponent extends BaseUiComponent {
+  /** Display as a small dot indicator */
+  @Input() dot = false;
 
-    /** Badge size */
-    @Input() size: 'sm' | 'md' | 'lg' = 'md';
-
-    /** Show as dot instead of text */
-    @Input() dot = false;
-
-    /** Custom ARIA label */
-    @Input() ariaLabel?: string;
-
-    getBadgeClasses(): string {
-        const classes = ['badge', `badge-${this.variant}`, `badge-${this.size}`];
-        if (this.dot) {
-            classes.push('badge-dot');
-        }
-        return classes.join(' ');
-    }
+  getBadgeClasses(): string {
+    return `badge-${this.variant} badge-${this.size}`;
+  }
 }

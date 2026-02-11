@@ -1,0 +1,75 @@
+@import 'tokens';
+@import 'spacing';
+@import 'elevation';
+
+.flex {
+    display: flex;
+}
+
+.grid {
+    display: grid;
+}
+
+.hidden {
+    display: none;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.gap-2 {
+    gap: var(--spacing-2);
+}
+
+.gap-4 {
+    gap: var(--spacing-4);
+}
+
+.p-4 {
+    padding: var(--spacing-4);
+}
+
+.m-4 {
+    margin: var(--spacing-4);
+}
+
+.rounded-md {
+    border-radius: var(--radius-md);
+}
+
+.shadow-md {
+    box-shadow: var(--shadow-md);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-sm {
+    font-size: var(--text-sm);
+}
+
+.font-bold {
+    font-weight: var(--font-bold);
+}
+
+.text-primary {
+    color: var(--color-primary);
+}
+
+.bg-surface {
+    background-color: var(--color-surface-0);
+}

@@ -1,53 +1,26 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterOutlet } from '@angular/router';
 
-/**
- * Fullscreen layout component that fills the entire viewport.
- * 
- * Provides a simple, full-screen container for content.
- * Commonly used for:
- * - Login/authentication pages
- * - Splash screens
- * - Landing pages
- * - Presentation modes
- * 
- * @example
- * ```html
- * <platform-fullscreen-layout>
- *   <div class="login-container">
- *     <h1>Welcome</h1>
- *     <form>
- *       <!-- Login form -->
- *     </form>
- *   </div>
- * </platform-fullscreen-layout>
- * ```
- */
 @Component({
   selector: 'platform-fullscreen-layout',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterOutlet],
   template: `
-    <div class="fullscreen-container" role="main">
+    <div class="fullscreen-container">
+      <router-outlet></router-outlet>
       <ng-content></ng-content>
     </div>
   `,
   styles: [`
     .fullscreen-container {
-      height: 100%;
+      min-height: 100vh;
       width: 100%;
       display: flex;
       flex-direction: column;
-      background-color: var(--color-background, #ffffff);
-      color: var(--color-text, #111827);
-      overflow: auto;
+      background-color: var(--color-surface-50);
     }
-
-    :host {
-      display: block;
-      height: 100%;
-      width: 100%;
-    }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FullScreenLayoutComponent { }
+export class FullscreenLayoutComponent { }

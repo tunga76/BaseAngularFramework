@@ -1,0 +1,19 @@
+// Import ui-platform design tokens and base styles
+@import '../../../libs/ui-platform/src/lib/styles/tokens';
+@import '../../../libs/ui-platform/src/lib/styles/spacing';
+@import '../../../libs/ui-platform/src/lib/styles/typography';
+@import '../../../libs/ui-platform/src/lib/styles/utilities';
+
+// Global resets
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family-base);
+    color: var(--color-text-primary);
+    background-color: var(--color-surface-50);
+    line-height: var(--line-height-normal);
+}

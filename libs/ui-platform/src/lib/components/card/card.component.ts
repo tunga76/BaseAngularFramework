@@ -1,106 +1,129 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-/**
- * Card component for grouping related content.
- * 
- * Provides a flexible container with slots for header, content, and footer.
- * Supports hover effects and clickable cards.
- * 
- * @example
- * ```html
- * <platform-card>
- *   <div card-header>
- *     <h3>Card Title</h3>
- *   </div>
- *   <div card-content>
- *     <p>Card content goes here</p>
- *   </div>
- *   <div card-footer>
- *     <platform-button>Action</platform-button>
- *   </div>
- * </platform-card>
- * 
- * <!-- Hoverable card -->
- * <platform-card [hoverable]="true">
- *   <div card-content>Hover me!</div>
- * </platform-card>
- * ```
- */
 @Component({
-    selector: 'platform-card',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'platform-card',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div class="card" 
+         [class.card-elevated]="variant === 'elevated'"
+         [class.card-outlined]="variant === 'outlined'"
+         [class.card-flat]="variant === 'flat'"
          [class.hoverable]="hoverable"
-         [class.padded]="padded"
-         role="article">
-      <div *ngIf="hasHeader" class="card-header">
+         [class.padding-none]="padding === 'none'"
+         [class.padding-sm]="padding === 'sm'"
+         [class.padding-md]="padding === 'md'"
+         [class.padding-lg]="padding === 'lg'">
+      
+      <!-- Header -->
+      <div class="card-header" *ngIf="hasHeaderWrapper">
         <ng-content select="[card-header]"></ng-content>
       </div>
       
+      <!-- Content -->
       <div class="card-content">
-        <ng-content select="[card-content]"></ng-content>
         <ng-content></ng-content>
       </div>
       
-      <div *ngIf="hasFooter" class="card-footer">
+      <!-- Footer -->
+      <div class="card-footer" *ngIf="hasFooterWrapper">
         <ng-content select="[card-footer]"></ng-content>
       </div>
     </div>
   `,
-    styles: [`
-    .card {
-      background-color: var(--color-surface, #ffffff);
-      border: 1px solid var(--color-border, #e5e7eb);
-      border-radius: var(--radius-md, 8px);
-      overflow: hidden;
-      transition: all var(--transition-md, 0.2s ease);
+  styles: [`
+    :host {
+      display: block;
     }
 
+    .card {
+      background-color: var(--color-surface-0);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Variants */
+    .card-elevated {
+      box-shadow: var(--shadow-md);
+      border: 1px solid transparent; /* Maintain size parity */
+    }
+
+    .card-outlined {
+      border: 1px solid var(--color-border);
+      box-shadow: none;
+    }
+
+    .card-flat {
+      background-color: var(--color-surface-50);
+      border: none;
+      box-shadow: none;
+    }
+
+    /* Hoverable */
     .card.hoverable:hover {
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
-                  0 2px 4px -1px rgba(0, 0, 0, 0.06);
       transform: translateY(-2px);
-      border-color: var(--color-border-hover, #d1d5db);
+      box-shadow: var(--shadow-lg);
       cursor: pointer;
     }
+    .card-outlined.hoverable:hover {
+      border-color: var(--color-primary-light);
+    }
 
+    /* Padding */
+    .padding-none .card-content { padding: 0; }
+    .padding-sm .card-content { padding: var(--spacing-3); }
+    .padding-md .card-content { padding: var(--spacing-5); }
+    .padding-lg .card-content { padding: var(--spacing-8); }
+
+    /* Sections */
     .card-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--color-border, #e5e7eb);
-      background-color: var(--color-background, #f9fafb);
-    }
-
-    .card-content {
-      padding: 20px;
-    }
-
-    .card.padded .card-content {
-      padding: 24px;
+      padding: var(--spacing-4) var(--spacing-5);
+      border-bottom: 1px solid var(--color-border);
+      background-color: transparent;
+      font-weight: var(--font-semibold);
+      font-size: var(--text-lg);
     }
 
     .card-footer {
-      padding: 12px 20px;
-      border-top: 1px solid var(--color-border, #e5e7eb);
-      background-color: var(--color-background, #f9fafb);
+      padding: var(--spacing-4) var(--spacing-5);
+      border-top: 1px solid var(--color-border);
+      background-color: var(--color-surface-50);
       display: flex;
       align-items: center;
-      gap: 12px;
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardComponent {
-    /** Whether the card should have hover effects */
-    @Input() hoverable = false;
+  @Input() variant: 'elevated' | 'outlined' | 'flat' = 'elevated';
+  @Input() padding: 'none' | 'sm' | 'md' | 'lg' = 'md';
+  @Input() hoverable = false;
 
-    /** Whether to add extra padding to content */
-    @Input() padded = false;
+  // These are just helpers to check if the wrapper divs are needed visually?
+  // Actually ng-content select doesn't create the element if not found, but the wrapper div will be empty.
+  // CSS :empty pseudo class is an option, or we just rely on the user utilizing the slots correctly.
+  // To strictly hide the wrapper if empty content is projected is hard without a directive.
+  // For now we assume if the user projects content they want the wrapper.
+  // We can add simple inputs to force hide if needed, but CSS :empty on wrapper might work if no text nodes are present.
 
-    /** Internal flag for header presence */
-    hasHeader = true;
+  // A cleaner way usually involves directives like *platformCardHeader, but querySelector is heavy.
+  // We'll stick to simple projection.
 
-    /** Internal flag for footer presence */
-    hasFooter = true;
+  // For the generated code, I'll assume wrappers are always there if I can't detect content easily in standalone.
+  // Actually, I can use a simple trick: use CSS to hide empty wrappers if needed.
+  // .card-header:empty { display: none; } 
+  // But ng-content doesn't make it empty, it puts the comment node there.
+
+  // I'll add boolean inputs to suppress them if needed, or just let them be.
+  // Actually, standard practice often is just checking if we can wrap the ng-content in the div.
+  // I will add hasHeaderWrapper as convenience, defaulting to true, but ideally we check if `select` matched anything.
+  // Since we can't easily check `select` result count in template only...
+  // I'll leave them always rendered for now, or assume the user will put content if they want header.
+
+  get hasHeaderWrapper(): boolean { return true; }
+  get hasFooterWrapper(): boolean { return true; }
 }

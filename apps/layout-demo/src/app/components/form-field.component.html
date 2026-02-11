@@ -1,0 +1,47 @@
+<div class="mb-3 row hks-text-primary">
+    <label class="col-sm-3 col-form-label">
+        {{ label }}:
+    </label>
+
+    <div class="col-sm-9">
+
+        <!-- TEXT INPUT -->
+        <input *ngIf="type === 'text'" [type]="type" class="form-control" [formControlName]="controlName"
+            [readOnly]="readonly" [ngClass]="{
+                            'is-invalid': isInvalid,
+                            'is-valid': isValid
+                        }" />
+
+        <!-- NUMBER INPUT -->
+        <input *ngIf="type === 'number'" type="number" class="form-control" [formControlName]="controlName"
+            [readOnly]="readonly" [ngClass]="{
+        'is-invalid': isInvalid,
+        'is-valid': isValid
+      }" />
+
+        <!-- SELECT -->
+        <select *ngIf="type === 'select'" class="form-select" [formControlName]="controlName" [disabled]="readonly"
+            [ngClass]="{
+        'is-invalid': isInvalid,
+        'is-valid': isValid
+      }">
+
+            <option value="">Lütfen Seçiniz</option>
+
+            <option *ngFor="let opt of options" [value]="opt.value">
+                {{ opt.label }}
+            </option>
+        </select>
+
+        <!-- VALIDATION -->
+        <div *ngIf="isInvalid" class="text-danger mt-1">
+            {{ errorMessage }}
+        </div>
+
+        <!-- RF COMPARE -->
+        <div *ngIf="compareMismatch" class="text-warning mt-1">
+            RF verisi ile uyuşmuyor.
+        </div>
+
+    </div>
+</div>

@@ -366,8 +366,13 @@
               }
             ],
             "styles": [
-              "apps/platform-showcase/src/styles.css"
-            ]
+              "apps/platform-showcase/src/styles.scss"
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "libs/ui-platform/src/lib/styles"
+              ]
+            }
           },
           "configurations": {
             "production": {
@@ -423,7 +428,7 @@
               }
             ],
             "styles": [
-              "apps/platform-showcase/src/styles.css"
+              "apps/platform-showcase/src/styles.scss"
             ]
           }
         }
@@ -718,6 +723,129 @@
             ],
             "styles": [
               "apps/form-engine-app/src/styles.css"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    },
+    "layout-demo": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss",
+          "skipTests": true
+        },
+        "@schematics/angular:class": {
+          "skipTests": true
+        },
+        "@schematics/angular:directive": {
+          "skipTests": true
+        },
+        "@schematics/angular:guard": {
+          "skipTests": true
+        },
+        "@schematics/angular:interceptor": {
+          "skipTests": true
+        },
+        "@schematics/angular:pipe": {
+          "skipTests": true
+        },
+        "@schematics/angular:resolver": {
+          "skipTests": true
+        },
+        "@schematics/angular:service": {
+          "skipTests": true
+        }
+      },
+      "root": "apps/layout-demo",
+      "sourceRoot": "apps/layout-demo/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": "dist/layout-demo",
+            "index": "apps/layout-demo/src/index.html",
+            "browser": "apps/layout-demo/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "apps/layout-demo/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "apps/layout-demo/public"
+              }
+            ],
+            "styles": [
+              "apps/layout-demo/src/styles.scss"
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "libs/ui-platform/src/lib/styles"
+              ]
+            },
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "layout-demo:build:production"
+            },
+            "development": {
+              "buildTarget": "layout-demo:build:development",
+              "port": 4201
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "apps/layout-demo/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "apps/layout-demo/public"
+              }
+            ],
+            "styles": [
+              "apps/layout-demo/src/styles.scss"
             ],
             "scripts": []
           }

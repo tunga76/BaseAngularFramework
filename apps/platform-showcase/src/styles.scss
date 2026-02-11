@@ -1,0 +1,140 @@
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import '../../../libs/ui-platform/src/lib/styles/tokens';
+@import '../../../libs/ui-platform/src/lib/styles/spacing';
+@import '../../../libs/ui-platform/src/lib/styles/elevation';
+@import '../../../libs/ui-platform/src/lib/styles/typography';
+@import '../../../libs/ui-platform/src/lib/styles/utilities';
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-sans, Roboto, "Helvetica Neue", sans-serif);
+    background-color: var(--color-surface-50);
+    color: var(--color-text-primary);
+}
+
+/* Map legacy variables to new tokens if needed, or just use new tokens directly in the app. 
+   For now, we keep some compatibility variables if the app relies on them specifically by name 
+   and they don't exist in the library, or alias them.
+*/
+:root {
+    /* Aliasing for compatibility or specific showcase overrides */
+    --color-surface: var(--color-surface-0);
+    --color-background: var(--color-surface-50);
+    --color-text: var(--color-text-primary);
+    --color-text-muted: var(--color-text-secondary);
+
+    /* Spacing aliases if needed, though library provides --spacing-4 etc. 
+       The old app used sm/md/lg. 
+    */
+    --spacing-sm: var(--spacing-2);
+    /* 8px */
+    --spacing-md: var(--spacing-3);
+    /* 12px */
+    --spacing-lg: var(--spacing-4);
+    /* 16px */
+
+    --radius-md: var(--radius-md);
+
+    /* Typography aliases */
+    --font-size-xs: var(--text-xs);
+    --font-size-sm: var(--text-sm);
+    --font-size-md: var(--text-base);
+    --font-size-lg: var(--text-lg);
+}
+
+/* Showcase page styles */
+.showcase-page {
+    padding: var(--spacing-10);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    margin-bottom: var(--spacing-10);
+    padding-bottom: var(--spacing-6);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.page-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-2) 0;
+}
+
+.page-description {
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.section {
+    margin-bottom: var(--spacing-12);
+}
+
+.section-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-4) 0;
+}
+
+.demo-container {
+    background: var(--color-surface-0);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-8);
+    margin-bottom: var(--spacing-6);
+    box-shadow: var(--shadow-sm);
+}
+
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-4);
+}
+
+.demo-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-3);
+    align-items: center;
+}
+
+.code-block {
+    background: #1e293b;
+    /* Keep dark background for code */
+    color: #e2e8f0;
+    padding: var(--spacing-5);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono, 'Courier New', monospace);
+    font-size: var(--text-sm);
+    overflow-x: auto;
+    margin-top: var(--spacing-3);
+}
+
+.code-block pre {
+    margin: 0;
+}
+
+/* Modal specific overrides if needed */
+::ng-deep .platform-modal-panel .mat-mdc-dialog-surface {
+    border-radius: var(--radius-md, 8px) !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+}
+
+::ng-deep .platform-modal-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+[modal-footer] platform-button {
+    margin-left: var(--spacing-2);
+}

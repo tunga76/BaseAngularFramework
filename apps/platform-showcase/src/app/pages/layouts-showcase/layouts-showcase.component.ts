@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { DashboardLayoutComponent, SplitViewLayoutComponent, ButtonComponent } from '@platform/ui-platform';
 
 @Component({
-    selector: 'app-layouts-showcase',
-    standalone: true,
-    imports: [CommonModule, DashboardLayoutComponent, SplitViewLayoutComponent, ButtonComponent],
-    template: `
+  selector: 'app-layouts-showcase',
+  standalone: true,
+  imports: [CommonModule, DashboardLayoutComponent, SplitViewLayoutComponent, ButtonComponent],
+  template: `
     <div class="showcase-page">
       <div class="page-header">
         <h1 class="page-title">Layout Components</h1>
@@ -32,7 +32,7 @@ import { DashboardLayoutComponent, SplitViewLayoutComponent, ButtonComponent } f
                   <h3>App</h3>
                 </div>
                 
-                <nav sidebar-nav class="demo-nav">
+                <nav sidebar-content class="demo-nav">
                   <a href="javascript:void(0)" class="nav-item active">
                     <span>📊</span> Dashboard
                   </a>
@@ -74,16 +74,10 @@ import { DashboardLayoutComponent, SplitViewLayoutComponent, ButtonComponent } f
 
           <div class="demo-wrapper">
             <div class="demo-controls">
-              <platform-button size="sm" (onClick)="toggleDirection()">
-                Toggle Direction ({{ direction }})
-              </platform-button>
+              <!-- Controls not supported yet -->
             </div>
             <div class="demo-container split-demo">
-              <platform-split-view-layout
-                [direction]="direction"
-                [initialSize]="300"
-                [minSize]="200"
-                [maxSize]="600">
+              <platform-split-view-layout>
                 <div left-pane class="pane pane-1">
                   <h3>Pane 1</h3>
                   <p>Resizable area</p>
@@ -102,7 +96,7 @@ import { DashboardLayoutComponent, SplitViewLayoutComponent, ButtonComponent } f
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .layout-demos {
       display: flex;
       flex-direction: column;
@@ -275,10 +269,4 @@ import { DashboardLayoutComponent, SplitViewLayoutComponent, ButtonComponent } f
     }
   `]
 })
-export class LayoutsShowcaseComponent {
-    direction: 'horizontal' | 'vertical' = 'horizontal';
-
-    toggleDirection() {
-        this.direction = this.direction === 'horizontal' ? 'vertical' : 'horizontal';
-    }
-}
+export class LayoutsShowcaseComponent { }

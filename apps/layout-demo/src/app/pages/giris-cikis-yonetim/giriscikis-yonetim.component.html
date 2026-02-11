@@ -1,0 +1,334 @@
+<div class="container px-3 rounded shadow-sm">
+  <form [formGroup]="frm" (ngSubmit)="onSubmit()">
+    <input type="hidden" formControlName="Id">
+
+    <div class="row">
+      <!-- Sağ Bölüm (Resimler) (dataHudutKapisiIdEvent)="receiveHudutKapisiId($event)"-->
+      <div class="col-lg-2 col-md-12 col-sm-12 border rounded shadow-lg">
+        <app-talimat-viewmodel></app-talimat-viewmodel>
+        <div class="row text-center hks-text-primary">
+          <app-camera [startFaceDetected]="faceDetectedStart"
+            (addDocumentImageItem)="addDocumentImageItem($event.ImagesDocument,$event.isCamera)"
+            (IsConnectedCameraEmitter)="receiveCameraConnectStatus($event)"></app-camera>
+        </div>
+        <div class="row d-flex align-items-center my-3">
+          <div class="col-6">
+            <img id="belgeresim" style="max-width: 110%" [src]="documentImage" alt="Pasaport Fotoğrafı">
+          </div>
+          <div class="col-6">
+            <img id="faceDetectedImageId" style="max-width: 110%" [src]="'assets/images/resimyok.jpg'"
+              alt="Tespit Edilen Yüz">
+          </div>
+        </div>
+      </div>
+
+      <!-- Sol Bölüm -->
+      <div class="col-lg-5 col-md-12 col-sm-12">
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="belgeTuru" class="col-sm-3 col-form-label">Belge Türü:</label>
+          <div class="col-sm-9">
+            <select class="form-select" id="belgeTuru"
+              [style.pointer-events]="readonlyFlags.BelgeTuru ? 'none' : 'auto'"
+              [style.backgroundColor]="readonlyFlags.BelgeTuru ? '#eee' : 'white'"
+              [ngClass]="{'is-invalid': frm.get('BelgeTuru')?.invalid && frm.get('BelgeTuru')?.touched, 'is-valid': frm.get('BelgeTuru')?.valid}"
+              formControlName="BelgeTuru" aria-label="Default size">
+              <option value="">Lütfen Seçiniz</option>
+
+              @for (document of documentTypeList; track document.id) {
+              <option [value]="document.kod">{{ document.ad }}</option>
+              }
+
+            </select>
+            @if (frm.get('BelgeTuru')?.invalid && frm.get('BelgeTuru')?.touched) {
+            <div class="text-danger">
+              Belge Türü zorunludur.
+            </div>
+            }
+            @if (isRfIdMatch('BelgeTuru','RfBelgeTuru')) {
+            <div class="text-success">
+              Rf Id Değeri ile Aynı Değil.
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="harfSeriNo" class="col-sm-3 col-form-label">Harf Seri No:</label>
+          <div class="col-sm-9">
+            <select class="form-select" [style.pointer-events]="readonlyFlags.HarfSeriNo ? 'none' : 'auto'"
+              [style.backgroundColor]="readonlyFlags.HarfSeriNo ? '#eee' : 'white'"
+              [ngClass]="{'is-invalid': frm.get('HarfSeriNo')?.invalid && frm.get('HarfSeriNo')?.touched, 'is-valid': frm.get('HarfSeriNo')?.valid && frm.get('HarfSeriNo')?.touched && frm.get('HarfSeriNo')?.value !== ''}"
+              id="harfSeriNo" formControlName="HarfSeriNo" aria-label="Default size">
+              <option selected value="">Lütfen Seçiniz</option>
+              @for (document of filteredHarfSeriList; track document.id) {
+              <option [value]="document.id">{{ document.ad }}</option>
+              }
+
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="seriNo" class="col-sm-3 col-form-label">Seri No :</label>
+          <div class="col-sm-9">
+            <input type="text" id="seriNo" class="form-control" [readOnly]="isReadOnly.value" formControlName="SeriNo"
+              placeholder="Belge Seri No" [ngClass]="{
+                          'is-invalid': frm.get('SeriNo')?.invalid && frm.get('SeriNo')?.touched,
+                          'is-valid': frm.get('SeriNo')?.valid && frm.get('SeriNo')?.value !== ''
+                        }" />
+            <ng-container *validationMessage="frm.get('SeriNo')"></ng-container>
+          </div>
+        </div>
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="kimlikNo" class="col-sm-3 col-form-label">Kimlik No:</label>
+          <div class="col-sm-9">
+            <input type="text" [ngClass]="{
+                                'is-invalid': frm.get('KimlikNo')?.invalid && frm.get('KimlikNo')?.touched,
+                                'is-valid': frm.get('KimlikNo')?.valid && 
+                                           frm.get('KimlikNo')?.value !== '' && 
+                                           frm.get('Ulke')?.value === 'TUR' && 
+                                           frm.get('KimlikNo')?.touched
+                            }" class="form-control" [readOnly]="isReadOnly.value" formControlName="KimlikNo"
+              placeholder="Kimlik No">
+          </div>
+        </div>
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="ad" class="col-sm-3 col-form-label">Ad:</label>
+          <div class="col-sm-9">
+            <input type="text" id="ad" class="form-control" [readOnly]="isReadOnly.value" formControlName="Ad"
+              placeholder="Adı"
+              [ngClass]="{'is-invalid': frm.get('Ad')?.invalid && frm.get('Ad')?.touched, 'is-valid': frm.get('Ad')?.valid}">
+            @if (frm.get('Ad')?.invalid && frm.get('Ad')?.touched) {
+            <div class="text-danger">
+              Ad en az 2 karakter olmalıdır.
+            </div>
+            }
+            @if (frm.get('Ad')?.hasError('forbiddenChars')) {
+            <div class="text-danger">
+              Ad alanında izin verilmeyen karakter olmamalıdır.
+            </div>
+            }
+            @if (frm.get('Ad')?.hasError('onlyLetters')) {
+            <div class="text-danger">
+              Ad alanında Alfanümerik karakter olmamalıdır.
+            </div>
+            }
+            @if (isRfIdMatch('Ad','RfAd')) {
+            <div class="text-success">
+              Rf Id Değeri ile Aynı Değil.
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="soyad" class="col-sm-3 col-form-label">Soyad:</label>
+          <div class="col-sm-9">
+            <input type="text" id="soyad" class="form-control" [readOnly]="isReadOnly.value" formControlName="Soyad"
+              placeholder="Soyadı"
+              [ngClass]="{'is-invalid': frm.get('Soyad')?.invalid && frm.get('Soyad')?.touched, 'is-valid': frm.get('Soyad')?.valid}">
+            @if (frm.get('Soyad')?.invalid && frm.get('Soyad')?.touched) {
+            <div class="text-danger">
+              Soyad en az 2 karakter olmalı
+            </div>
+            }
+            @if (frm.get('Soyad')?.hasError('forbiddenChars')) {
+            <div class="text-danger">
+              Soyad alanında Alfanümerik karakter olmamalıdır.
+            </div>
+            }
+            @if (frm.get('Soyad')?.hasError('onlyLetters')) {
+            <div class="text-danger">
+              Soyad alanında Alfanümerik karakter olmamalıdır.
+            </div>
+            }
+            @if (isRfIdMatch('Soyad','RfSoyad')) {
+            <span class="text-warning">
+              Soyad, RF verisiyle uyuşmuyor.
+            </span>
+            }
+          </div>
+        </div>
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="dogumTarihi" class="col-sm-3 col-form-label">Doğum Tarihi:</label>
+          <div class="col-sm-9">
+            <div class="row gx-2">
+              <div class="col-md-4">
+                <input class="form-control" type="number" [readOnly]="isReadOnly.value"
+                  [ngClass]="{'is-invalid': frm.get('DogumTarihiGun')?.invalid && frm.get('DogumTarihiGun')?.touched, 'is-valid': frm.get('DogumTarihiGun')?.valid}"
+                  id="dogumGun" placeholder="Gün" maxlength="2" formControlName="DogumTarihiGun" #gunInput
+                  (input)="autoFocusNext($event, ayInput, 2)" />
+              </div>
+              <div class="col-md-4">
+                <input class="form-control" type="number" [readOnly]="isReadOnly.value"
+                  [ngClass]="{'is-invalid': frm.get('DogumTarihiAy')?.invalid && frm.get('DogumTarihiAy')?.touched, 'is-valid': frm.get('DogumTarihiAy')?.valid}"
+                  id="dogumAy" placeholder="Ay" maxlength="2" formControlName="DogumTarihiAy" #ayInput
+                  (input)="autoFocusNext($event, yilInput, 2)" />
+              </div>
+              <div class="col-md-4">
+                <input class="form-control" type="number" [readOnly]="isReadOnly.value"
+                  [ngClass]="{'is-invalid': frm.get('DogumTarihiYil')?.invalid && frm.get('DogumTarihiYil')?.touched, 'is-valid': frm.get('DogumTarihiYil')?.valid}"
+                  id="dogumYil" placeholder="Yıl" maxlength="4" formControlName="DogumTarihiYil" #yilInput />
+              </div>
+              @if (frm.errors?.['invalidDogumTarihi'] && (frm.get('DogumTarihiGun')?.touched ||
+              frm.get('DogumTarihiAy')?.touched || frm.get('DogumTarihiYil')?.touched)) {
+              <div>
+                {{ frm.errors['invalidDogumTarihi'] }}
+              </div>
+              }
+            </div>
+            @if (isDateMatch()) {
+            <div class="text-warning">
+              Doğum Tarihi ile Rf Id Değeri Farklı.
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="cinsiyet" class="col-sm-3 col-form-label">Cinsiyet:</label>
+          <div class="col-sm-9">
+            <select class="form-select" [style.pointer-events]="readonlyFlags.Cinsiyet ? 'none' : 'auto'"
+              [style.backgroundColor]="readonlyFlags.Cinsiyet ? '#eee' : 'white'"
+              [ngClass]="{'is-invalid': frm.get('Cinsiyet')?.invalid && frm.get('Cinsiyet')?.touched, 'is-valid': frm.get('Cinsiyet')?.valid}"
+              id="cinsiyet" formControlName="Cinsiyet" aria-label="Default size">
+              <option value="">Lütfen Seçiniz</option>
+              @for (sex of sexList; track sex.id) {
+              <option [value]="sex.ad">{{ sex.ad }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Orta Bölüm -->
+      <div class="col-lg-5 col-md-12 col-sm-12">
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="verigiristipi" class="col-sm-3 col-form-label">Veri Giriş Tipi:</label>
+          <div class="col-sm-9">
+            <select class="form-select" id="verigiristipi" formControlName="VeriGirisTipiId" aria-label="Default size">
+              @for (reason of manuelReasonList; track reason.id) {
+              <option [value]="reason.id">{{ reason.ad }}</option>
+              }
+
+            </select>
+            @if (frm.get('VeriGirisTipiId')?.invalid && frm.get('VeriGirisTipiId')?.touched) {
+            <div class="text-danger">
+              Veri Giriş Tipi Seçilmedi.
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="sonGecerlilikTarihi" class="col-sm-3 col-form-label">Bel.Geç.Tar:</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" [readOnly]="isReadOnly.value" id="sonGecerlilikTarihi"
+              formControlName="SonGecerlilikTarihi" placeholder="Belge Son Geçerlilik Tarihi">
+          </div>
+        </div>
+
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="ulke" class="col-sm-3 col-form-label">Ülke:</label>
+          <div class="col-sm-9">
+            <ng-select class="form-select" [items]="countryList" bindLabel="ad" bindValue="kod" [searchable]="true"
+              [clearable]="true" [readonly]="readonlyFlags?.Ulke" [ngStyle]="{
+                'pointer-events': readonlyFlags?.Ulke ? 'none' : 'auto',
+                'background-color': readonlyFlags?.Ulke ? '#eee' : 'white'
+              }" [ngClass]="{
+                'is-invalid': frm.get('Ulke')?.invalid && frm.get('Ulke')?.touched,
+                'is-valid': frm.get('Ulke')?.valid
+              }" formControlName="Ulke" placeholder="Ülke seçiniz">
+            </ng-select>
+          </div>
+        </div>
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="babaAdi" class="col-sm-3 col-form-label">Baba Adı:</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" id="babaAdi" formControlName="BabaAd" placeholder="Baba Adı:">
+            @if (frm.get('BabaAd')?.hasError('forbiddenChars')) {
+            <div class="text-danger">
+              Ad alanında izin verilmeyen karakter olmamalıdır.
+            </div>
+            }
+            @if (frm.get('BabaAd')?.hasError('onlyLetters')) {
+            <div class="text-danger">
+              Ad alanında Alfanümerik karakter olmamalıdır.
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="gelgitulke" class="col-sm-3 col-form-label">Gel./Gid. Ülke:</label>
+          <div class="col-sm-9">
+            <ng-select class="form-select" [items]="countryList" bindLabel="ad" bindValue="kod" [searchable]="true"
+              [clearable]="true" formControlName="GeldigiGittigiUlke" placeholder="Ülke seçiniz">
+            </ng-select>
+          </div>
+        </div>
+
+        <div class="mb-3 row hks-text-primary">
+          <label for="gelgitnedeni" class="col-sm-3 col-form-label">Gel./Gid. Nedeni:</label>
+          <div class="col-sm-9">
+
+            <select class="form-select" id="gelgitnedeni" formControlName="GelisGidisNedeniId"
+              aria-label="Default size">
+              <option value="">Lütfen Seçiniz</option>
+              @for (reason of girisCikisNedeniList; track reason.id) {
+              <option [value]="reason.id">{{ reason.ad }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        @if (isKaraHudutKapisi) {
+        <app-arac-yolcu [aracYolcuForm]="aracYolcuForm"></app-arac-yolcu>
+        }
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 d-flex justify-content-center align-items-center gap-2">
+        <!-- <app-finger-print></app-finger-print>
+        <div class="btn btn-secondary d-flex align-items-center justify-content-center"
+          style="width: 60px; height: 43px; pointer-events: none; cursor: not-allowed;">
+          <app-barcode-reader (BarcodeReaderDataEmitter)="receiveBoardingCardData($event)"></app-barcode-reader>
+        </div> -->
+
+        <!-- <button mat-raised-button color="accent" (click)="showSuccessExample()">
+          <mat-icon>check_circle</mat-icon>
+          Başarılı İşlemler
+        </button> -->
+
+        <button type="button" class="btn btn-secondary" (click)="onResetSure()">Temizle</button>
+
+        <button class="btn btn-primary" [ngClass]="{ 'cursor-not-allowed': frm.invalid }">
+          Kaydet
+        </button>
+      </div>
+
+    </div>
+    <app-document-images [parentFormGroup]="frm" [imagesFormArray]="DocumentImages"
+      (remove)="removeDocumentImageItem($event)" (validationError)="onDocumentImagesError($event)">
+    </app-document-images>
+  </form>
+</div>
+
+<div class="container d-flex gap-3 p-2 bg-light rounded shadow-sm my-2">
+  <div #deviceStatusMessageArea class="optikReaderMessageArea">
+  </div>
+  <div id="progressContainer">
+    <div #progressBarOptikReader id="progressBarOptikReader">0%</div>
+  </div>
+</div>
+
+<div class="container d-flex justify-content-start align-items-start p-2 bg-light rounded shadow-sm my-2">
+  <div #messageArea id="messageArea"></div>
+</div>

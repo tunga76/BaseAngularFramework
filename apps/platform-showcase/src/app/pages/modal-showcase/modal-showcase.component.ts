@@ -34,10 +34,7 @@ import { ModalComponent, ButtonComponent } from '@platform/ui-platform';
         <h2 class="section-title">Modal Variants</h2>
         <div class="demo-container">
           <div class="demo-row">
-            <platform-button (onClick)="openModal('md', 'info')">Info</platform-button>
-            <platform-button (onClick)="openModal('md', 'success')">Success</platform-button>
-            <platform-button (onClick)="openModal('md', 'warning')">Warning</platform-button>
-            <platform-button (onClick)="openModal('md', 'error')">Error</platform-button>
+            <!-- Variants not supported yet -->
           </div>
         </div>
       </div>
@@ -46,10 +43,9 @@ import { ModalComponent, ButtonComponent } from '@platform/ui-platform';
         [open]="modalOpen"
         [size]="modalSize"
         [title]="modalTitle"
-        [variant]="modalVariant"
         (onClose)="closeModal()">
         <div modal-content>
-          <p>This is a {{ modalVariant }} modal. Press Escape or click outside to close.</p>
+          <p>This is a modal. Press Escape or click outside to close.</p>
         </div>
         <div modal-footer>
           <platform-button variant="primary" (onClick)="closeModal()">Confirm</platform-button>
@@ -62,13 +58,11 @@ import { ModalComponent, ButtonComponent } from '@platform/ui-platform';
 export class ModalShowcaseComponent {
   modalOpen = false;
   modalSize: 'sm' | 'md' | 'lg' | 'xl' = 'md';
-  modalVariant: 'default' | 'info' | 'success' | 'warning' | 'error' = 'default';
   modalTitle = 'Modal Title';
 
-  openModal(size: string, variant: 'default' | 'info' | 'success' | 'warning' | 'error' = 'default') {
+  openModal(size: string) {
     this.modalSize = size as any;
-    this.modalVariant = variant;
-    this.modalTitle = `${variant.charAt(0).toUpperCase() + variant.slice(1)} Modal`;
+    this.modalTitle = `Modal Title`;
     this.modalOpen = true;
   }
 

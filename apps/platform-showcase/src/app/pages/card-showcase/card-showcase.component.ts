@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { CardComponent, ButtonComponent, BadgeComponent } from '@platform/ui-platform';
 
 @Component({
-    selector: 'app-card-showcase',
-    standalone: true,
-    imports: [CommonModule, CardComponent, ButtonComponent, BadgeComponent],
-    template: `
+  selector: 'app-card-showcase',
+  standalone: true,
+  imports: [CommonModule, CardComponent, ButtonComponent, BadgeComponent],
+  template: `
     <div class="showcase-page">
       <div class="page-header">
         <h1 class="page-title">Card Component</h1>
@@ -37,7 +37,7 @@ import { CardComponent, ButtonComponent, BadgeComponent } from '@platform/ui-pla
             <div card-content>
               <h4>Product 1</h4>
               <p>Hover over me!</p>
-              <platform-badge variant="success">In Stock</platform-badge>
+              <platform-badge variant="primary">In Stock</platform-badge>
             </div>
           </platform-card>
 
@@ -45,7 +45,7 @@ import { CardComponent, ButtonComponent, BadgeComponent } from '@platform/ui-pla
             <div card-content>
               <h4>Product 2</h4>
               <p>Click to learn more</p>
-              <platform-badge variant="warning">Limited</platform-badge>
+              <platform-badge variant="danger">Limited</platform-badge>
             </div>
           </platform-card>
         </div>

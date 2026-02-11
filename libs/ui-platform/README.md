@@ -1,63 +1,87 @@
-# UiPlatform
+# Angular Enterprise UI Framework
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.0.
+A production-ready, modular, and themeable Angular UI library for enterprise applications.
 
-## Code scaffolding
+## Features
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- **Standalone Components**: All components are standalone and tree-shakable.
+- **Signal-Based**: Uses Angular Signals for state management (Theme, Loading, etc.).
+- **OnPush Change Detection**: High performance by default.
+- **Theming**: CSS Variable based theming with Light/Dark mode support.
+- **Accessibility**: ARIA compliant components.
+- **Strict TypeScript**: Type-safe and robust.
 
-```bash
-ng generate component component-name
+## Usage
+
+### 1. Import Styles
+
+Add the styles to your `styles.scss` or `angular.json`:
+```scss
+// styles.scss
+@import 'libs/ui-platform/src/lib/styles/tokens';
+@import 'libs/ui-platform/src/lib/styles/typography';
+@import 'libs/ui-platform/src/lib/styles/utilities';
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### 2. Setup Theme
 
-```bash
-ng generate --help
+In your `AppComponent`:
+
+```typescript
+import { ThemeService, ThemeProviderComponent } from '@platform/ui-platform';
+
+@Component({
+  // ...
+  imports: [ThemeProviderComponent],
+  template: `
+    <platform-theme-provider></platform-theme-provider>
+    <router-outlet></router-outlet>
+  `
+})
+export class AppComponent {
+  constructor(private themeService: ThemeService) {
+    // Theme is auto-initialized based on system preference or local storage
+  }
+
+  toggleTheme() {
+    this.themeService.toggleTheme();
+  }
+}
 ```
 
-## Building
+### 3. Use Components
 
-To build the library, run:
+Import what you need:
 
-```bash
-ng build ui-platform
+```typescript
+import { ButtonComponent, InputComponent, CardComponent } from '@platform/ui-platform';
+
+@Component({
+  standalone: true,
+  imports: [ButtonComponent, InputComponent, CardComponent],
+  template: `
+    <platform-card>
+      <platform-button variant="primary">Click Me</platform-button>
+    </platform-card>
+  `
+})
 ```
 
-This command will compile your project, and the build artifacts will be placed in the `dist/` directory.
+## Architecture
 
-### Publishing the Library
+- **Core**: Base classes and interfaces.
+- **Components**: UI elements (Button, Input, etc.).
+- **Services**: Global services (Toast, Modal, Loading).
+- **Theme**: Theme management.
+- **Layouts**: Page layouts (Dashboard, Fullscreen).
 
-Once the project is built, you can publish your library by following these steps:
+## Theming
 
-1. Navigate to the `dist` directory:
-   ```bash
-   cd dist/ui-platform
-   ```
+Defined in `src/lib/styles/_tokens.scss`. Override CSS variables to customize.
 
-2. Run the `npm publish` command to publish your library to the npm registry:
-   ```bash
-   npm publish
-   ```
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+```css
+:root {
+  --color-primary: #3b82f6;
+  --radius-md: 8px;
+}
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

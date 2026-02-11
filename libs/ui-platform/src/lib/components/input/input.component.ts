@@ -1,286 +1,204 @@
-import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, forwardRef, ChangeDetectionStrategy, ElementRef, ViewChild, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { BaseUiComponent } from '../../core/base-component';
 
-/**
- * Input component with validation, accessibility, and form control support.
- * 
- * Features:
- * - Form control integration (ControlValueAccessor)
- * - Validation states (invalid, valid, pending)
- * - Label and error message support
- * - Prefix/suffix icons or text
- * - Multiple input types
- * - Disabled and readonly states
- * - Full accessibility (ARIA attributes)
- * 
- * @example
- * ```html
- * <!-- Basic input -->
- * <platform-input 
- *   label="Email"
- *   type="email"
- *   placeholder="Enter your email"
- *   [(ngModel)]="email">
- * </platform-input>
- * 
- * <!-- With validation -->
- * <platform-input
- *   label="Password"
- *   type="password"
- *   [invalid]="hasError"
- *   errorMessage="Password is required">
- * </platform-input>
- * 
- * <!-- With prefix icon -->
- * <platform-input
- *   label="Search"
- *   prefixIcon="🔍"
- *   placeholder="Search...">
- * </platform-input>
- * ```
- */
 @Component({
-    selector: 'platform-input',
-    standalone: true,
-    imports: [CommonModule],
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => InputComponent),
-            multi: true
-        }
-    ],
-    template: `
-    <div class="input-wrapper" [class.disabled]="disabled" [class.invalid]="invalid">
-      <label *ngIf="label" [for]="inputId" class="input-label">
-        {{ label }}
-        <span *ngIf="required" class="required-indicator" aria-label="required">*</span>
-      </label>
+  selector: 'platform-input',
+  standalone: true,
+  imports: [CommonModule],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => InputComponent),
+      multi: true
+    }
+  ],
+  template: `
+    <div class="input-container" 
+         [class.focused]="focused" 
+         [class.disabled]="disabled" 
+         [class.invalid]="errorState"
+         [class.size-sm]="size === 'sm'"
+         [class.size-md]="size === 'md'"
+         [class.size-lg]="size === 'lg'">
       
-      <div class="input-container">
-        <span *ngIf="prefixIcon || prefixText" class="input-prefix" aria-hidden="true">
-          {{ prefixIcon || prefixText }}
-        </span>
-        
-        <input
-          [id]="inputId"
-          [type]="type"
-          [placeholder]="placeholder"
-          [disabled]="disabled"
-          [readonly]="readonly"
-          [required]="required"
-          [attr.aria-invalid]="invalid"
-          [attr.aria-describedby]="errorMessage ? inputId + '-error' : null"
-          [attr.aria-required]="required"
-          [value]="value"
-          (input)="onInput($event)"
-          (blur)="onTouched()"
-          (focus)="onFocus.emit($event)"
-          class="input-field"
-        />
-        
-        <span *ngIf="suffixIcon || suffixText" class="input-suffix" aria-hidden="true">
-          {{ suffixIcon || suffixText }}
-        </span>
-      </div>
-      
-      <span 
-        *ngIf="errorMessage && invalid" 
-        [id]="inputId + '-error'" 
-        class="error-message"
-        role="alert">
-        {{ errorMessage }}
+      <!-- Prefix -->
+      <span class="prefix" *ngIf="prefixIcon || prefixText">
+        <ng-content select="[prefix]"></ng-content>
+        {{ prefixText }}
+        <span *ngIf="prefixIcon" [class]="prefixIcon"></span>
       </span>
-      
-      <span *ngIf="helperText && !invalid" class="helper-text">
-        {{ helperText }}
+
+      <input
+        #inputElement
+        [type]="type"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [readonly]="readonly"
+        [value]="value"
+        [attr.id]="inputId"
+        (input)="onInput(inputElement.value)"
+        (blur)="onBlur()"
+        (focus)="onFocus($any($event))"
+        class="native-input"
+      />
+
+      <!-- Suffix -->
+      <span class="suffix" *ngIf="suffixIcon || suffixText">
+        <ng-content select="[suffix]"></ng-content>
+        {{ suffixText }}
+        <span *ngIf="suffixIcon" [class]="suffixIcon"></span>
       </span>
     </div>
   `,
-    styles: [`
-    .input-wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-family: inherit;
-    }
-
-    .input-label {
-      font-size: var(--font-size-sm, 14px);
-      font-weight: 500;
-      color: var(--color-text, #111827);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .required-indicator {
-      color: #ef4444;
+  styles: [`
+    :host {
+      display: block;
+      width: 100%;
     }
 
     .input-container {
-      position: relative;
       display: flex;
       align-items: center;
-      background-color: var(--color-surface, #ffffff);
-      border: 1px solid var(--color-border, #e5e7eb);
-      border-radius: var(--radius-md, 6px);
-      transition: all var(--transition-fast, 0.15s ease);
+      background-color: var(--color-surface-0);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      transition: all 0.2s ease;
+      width: 100%;
+      overflow: hidden;
     }
 
-    .input-container:focus-within {
-      border-color: var(--color-primary, #3b82f6);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    .input-container:hover:not(.disabled) {
+      border-color: var(--color-border-hover);
     }
 
-    .input-wrapper.invalid .input-container {
-      border-color: #ef4444;
+    .input-container.focused {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px var(--color-primary-light); /* Opacity handled by color or use rgba */
+      outline: none;
     }
 
-    .input-wrapper.invalid .input-container:focus-within {
-      border-color: #ef4444;
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    .input-container.invalid {
+      border-color: var(--color-error);
+    }
+    .input-container.invalid.focused {
+       box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
     }
 
-    .input-wrapper.disabled {
-      opacity: 0.6;
+    .input-container.disabled {
+      background-color: var(--color-surface-100);
       cursor: not-allowed;
+      opacity: 0.7;
     }
 
-    .input-field {
+    .native-input {
       flex: 1;
       border: none;
       outline: none;
       background: transparent;
-      padding: 10px 12px;
-      font-size: var(--font-size-md, 14px);
-      color: var(--color-text, #111827);
+      padding: 0;
+      color: var(--color-text-primary);
       font-family: inherit;
+      width: 100%;
+      height: 100%; /* Ensure full height */
+    }
+    
+    .native-input::placeholder {
+      color: var(--color-text-secondary);
+      opacity: 0.7;
     }
 
-    .input-field::placeholder {
-      color: var(--color-text-muted, #9ca3af);
-    }
-
-    .input-field:disabled {
-      cursor: not-allowed;
-    }
-
-    .input-prefix,
-    .input-suffix {
-      padding: 0 12px;
-      color: var(--color-text-muted, #9ca3af);
-      font-size: var(--font-size-md, 14px);
+    .prefix, .suffix {
       display: flex;
       align-items: center;
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+      height: 100%;
+      align-self: center;
     }
 
-    .error-message {
-      font-size: var(--font-size-sm, 12px);
-      color: #ef4444;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+    /* Sizes */
+    .size-sm {
+      padding: 0 var(--spacing-2);
+      height: 2rem;
+      font-size: var(--text-xs);
     }
+    .size-sm .native-input { font-size: var(--text-xs); }
 
-    .helper-text {
-      font-size: var(--font-size-sm, 12px);
-      color: var(--color-text-muted, #6b7280);
+    .size-md {
+      padding: 0 var(--spacing-3);
+      height: 2.5rem;
+      font-size: var(--text-sm);
     }
+    .size-md .native-input { font-size: var(--text-sm); }
 
-    /* Remove number input spinners */
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
+    .size-lg {
+      padding: 0 var(--spacing-4);
+      height: 3rem;
+      font-size: var(--text-base);
     }
-
-    input[type="number"] {
-      -moz-appearance: textfield;
-    }
-  `]
+    .size-lg .native-input { font-size: var(--text-base); }
+    
+    .prefix { margin-right: var(--spacing-2); }
+    .suffix { margin-left: var(--spacing-2); }
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InputComponent implements ControlValueAccessor {
-    /** Unique identifier for the input */
-    @Input() inputId = `input-${Math.random().toString(36).substr(2, 9)}`;
+export class InputComponent extends BaseUiComponent implements ControlValueAccessor {
+  @Input() type = 'text';
+  @Input() placeholder = '';
+  @Input() readonly = false;
+  @Input() inputId = '';
 
-    /** Label text displayed above input */
-    @Input() label?: string;
+  @Input() prefixText?: string;
+  @Input() prefixIcon?: string;
+  @Input() suffixText?: string;
+  @Input() suffixIcon?: string;
 
-    /** Input type */
-    @Input() type: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' = 'text';
+  /** Manually force error state */
+  @Input() errorState = false;
 
-    /** Placeholder text */
-    @Input() placeholder = '';
+  @Output() focus = new EventEmitter<FocusEvent>();
+  @Output() blur = new EventEmitter<void>();
 
-    /** Whether the input is disabled */
-    @Input() disabled = false;
+  @ViewChild('inputElement') inputElement!: ElementRef<HTMLInputElement>;
 
-    /** Whether the input is readonly */
-    @Input() readonly = false;
+  value = '';
+  focused = false;
 
-    /** Whether the input is required */
-    @Input() required = false;
+  onChange = (value: string) => { };
+  onTouched = () => { };
 
-    /** Whether the input is in an invalid state */
-    @Input() invalid = false;
+  writeValue(value: string): void {
+    this.value = value || '';
+  }
 
-    /** Error message to display when invalid */
-    @Input() errorMessage?: string;
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
 
-    /** Helper text displayed below input */
-    @Input() helperText?: string;
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn;
+  }
 
-    /** Icon or text to display before input */
-    @Input() prefixIcon?: string;
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
+  }
 
-    /** Text to display before input */
-    @Input() prefixText?: string;
+  onInput(value: string): void {
+    this.value = value;
+    this.onChange(value);
+  }
 
-    /** Icon or text to display after input */
-    @Input() suffixIcon?: string;
+  onFocus(event: FocusEvent): void {
+    this.focused = true;
+    this.focus.emit(event);
+  }
 
-    /** Text to display after input */
-    @Input() suffixText?: string;
-
-    /** Emitted when input receives focus */
-    @Output() onFocus = new EventEmitter<FocusEvent>();
-
-    /** Emitted when input value changes */
-    @Output() valueChange = new EventEmitter<string>();
-
-    /** Current input value */
-    value = '';
-
-    /** ControlValueAccessor callbacks */
-    private onChange: (value: string) => void = () => { };
-    onTouched: () => void = () => { };
-
-    /**
-     * Handles input events and updates the value.
-     */
-    onInput(event: Event): void {
-        const target = event.target as HTMLInputElement;
-        this.value = target.value;
-        this.onChange(this.value);
-        this.valueChange.emit(this.value);
-    }
-
-    // ControlValueAccessor implementation
-    writeValue(value: string): void {
-        this.value = value || '';
-    }
-
-    registerOnChange(fn: (value: string) => void): void {
-        this.onChange = fn;
-    }
-
-    registerOnTouched(fn: () => void): void {
-        this.onTouched = fn;
-    }
-
-    setDisabledState(isDisabled: boolean): void {
-        this.disabled = isDisabled;
-    }
+  onBlur(): void {
+    this.focused = false;
+    this.onTouched();
+    this.blur.emit();
+  }
 }
