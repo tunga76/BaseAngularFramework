@@ -1,8 +1,9 @@
 // Import ui-platform design tokens and base styles
-@import 'tokens';
-@import 'spacing';
-@import 'typography';
-@import 'utilities';
+@use 'tokens';
+@use 'spacing';
+@use 'typography';
+@use 'utilities';
+
 
 // Global resets
 * {
