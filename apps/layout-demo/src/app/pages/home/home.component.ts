@@ -31,6 +31,19 @@ import { RouterLink } from '@angular/router';
           </ul>
         </a>
 
+        <a routerLink="/camera" class="layout-card">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          </div>
+          <h2>Camera Layout</h2>
+          <p>Collapsible sidebar, top bar ve content area ile klasik camera layout</p>
+        </a>
+
         <a routerLink="/fullscreen-demo" class="layout-card">
           <div class="card-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

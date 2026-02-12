@@ -1,0 +1,7 @@
+<div [ngSwitch]="state()">
+
+    <div *ngSwitchCase="'CONNECTED'">🟢 Connected</div>
+    <div *ngSwitchCase="'RETRYING'">🟡 Reconnecting...</div>
+    <div *ngSwitchCase="'FAILED'">🔴 Failed</div>
+
+</div>

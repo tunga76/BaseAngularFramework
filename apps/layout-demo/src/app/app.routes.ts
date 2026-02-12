@@ -15,6 +15,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent)
     },
     {
+        path: 'camera',
+        loadComponent: () => import('./pages/camera/camera.component').then(m => m.CameraViewComponent)
+    },
+    {
         path: 'dashboard-demo',
         loadComponent: () => import('./pages/dashboard-demo/dashboard-demo.component').then(m => m.DashboardDemoComponent)
     },
