@@ -1,7 +1,30 @@
-<div [ngSwitch]="state()">
+<div class="camera-container">
 
-    <div *ngSwitchCase="'CONNECTED'">🟢 Connected</div>
-    <div *ngSwitchCase="'RETRYING'">🟡 Reconnecting...</div>
-    <div *ngSwitchCase="'FAILED'">🔴 Failed</div>
+    <img #livecam [src]="'assets/images/resimyok.jpg'" width="150" height="150" alt="Kamera Görüntüsü" />
+
+    <canvas #cameraCanvas class="camera-canvas"></canvas>
+    <canvas #overlayCanvas class="overlay-canvas"></canvas>
+
+    <!-- <div class="camera-status" [ngClass]="state$ | async">
+        {{ state$ | async }}
+    </div> -->
 
 </div>
+
+<div class="camera-controls">
+
+    <!-- <button type="button" class="camera-btn primary" (click)="capture()">
+        📷
+        <span>Resim Çek</span>
+    </button>
+
+    <button type="button" class="camera-btn secondary" (click)="restart()">
+        🔄
+        <span>Yeniden Başlat</span>
+    </button> -->
+
+</div>
+
+<!-- <div class="camera-message-area">
+    {{ message$ | async }}
+</div> -->

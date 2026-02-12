@@ -8,15 +8,17 @@ import { UserCameraModel } from '../../websocket/camera/user-camera.model';
     selector: 'app-camera-view',
     standalone: true,
     imports: [CommonModule],
-    template: `<img #img class="camera-frame" />`,
-    // templateUrl: './camera.component.html',
-    // styleUrl: './camera.component.scss',
+    templateUrl: './camera.component.html',
+    styleUrl: './camera.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CameraViewComponent implements AfterViewInit, OnDestroy {
 
-    @ViewChild('img') imgRef!: ElementRef<HTMLImageElement>;
-    public state = signal<'CONNECTED' | 'RETRYING' | 'FAILED' | 'DISCONNECTED'>('CONNECTED');
+    @ViewChild('livecam') livecamRef!: ElementRef<HTMLImageElement>;
+
+    private ctx!: CanvasRenderingContext2D;
+
+    public state$ = signal<'CONNECTED' | 'RETRYING' | 'FAILED' | 'DISCONNECTED'>('CONNECTED');
     private sub?: Subscription;
     private userCameraModel: UserCameraModel = {
         id: 1,
@@ -31,13 +33,42 @@ export class CameraViewComponent implements AfterViewInit, OnDestroy {
 
     constructor(private camera: CameraWebSocketService) { }
 
+    // @ViewChild('cameraCanvas', { static: true })
+    // canvasRef!: ElementRef<HTMLCanvasElement>;
+
+    // ngAfterViewInit() {
+    //     this.camera.connect(this.userCameraModel);
+    //     const canvas = this.canvasRef.nativeElement;
+    //     canvas.width = 150;
+    //     canvas.height = 150;
+    //     this.ctx = canvas.getContext('2d')!;
+
+    //     this.sub = this.camera.frame$
+    //         .subscribe(base64 => {
+    //             return this.drawFrame(base64.toString());
+    //         });
+    // }
+
+    // drawFrame(base64: string) {
+
+    //     const canvas = this.canvasRef.nativeElement;
+    //     const img = new Image();
+
+    //     img.onload = () => {
+    //         this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //         this.ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    //     };
+
+    //     img.src = `data:image/jpeg;base64,${base64}`;
+    // }
+
     ngAfterViewInit(): void {
 
-        this.camera.connect(JSON.stringify(this.userCameraModel));
+        this.camera.connect(this.userCameraModel);
 
         this.sub = this.camera.frame$
             .subscribe(base64 => {
-                this.imgRef.nativeElement.src =
+                this.livecamRef.nativeElement.src =
                     `data:image/jpeg;base64,${base64}`;
             });
     }

@@ -1,0 +1,24 @@
+.camera-canvas,
+.overlay-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.camera-container {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: 300px;
+}
+
+
+.camera-message-area {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+}

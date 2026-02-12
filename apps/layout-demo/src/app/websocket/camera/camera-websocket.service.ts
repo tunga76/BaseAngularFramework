@@ -1,4 +1,4 @@
-import { Injectable, NgZone, OnDestroy } from '@angular/core';
+import { Injectable, NgZone, OnDestroy, inject, DestroyRef } from '@angular/core';
 import {
     Subject,
     Observable,
@@ -7,6 +7,8 @@ import {
     animationFrameScheduler
 } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
+import { UserCameraModel } from './user-camera.model';
+import { SocketData } from '../socket.data';
 
 @Injectable({
     providedIn: 'root'
@@ -15,33 +17,43 @@ export class CameraWebSocketService implements OnDestroy {
 
     private socket: WebSocket | null = null;
     private reconnectSub?: Subscription;
-    private currentCameraModel?: string;
+    private currentCameraModel?: UserCameraModel;
 
     private readonly socketUrl = "ws://localhost:8084";
     private readonly reconnectInterval = 5000;
 
-    private frameSubject = new Subject<any>();
-
+    private frameSubject = new Subject<SocketData>();
+    private destroyRef = inject(DestroyRef);
     // Max ~30 FPS
-    public readonly frame$: Observable<any> =
+    public readonly frame$: Observable<SocketData> =
         this.frameSubject.pipe(
             throttleTime(33, animationFrameScheduler, { trailing: true })
         );
 
     constructor(private zone: NgZone) {
-        window.addEventListener('beforeunload', () => this.disconnect());
+        // Angular destroy
+        this.destroyRef.onDestroy(() => this.cleanup());
+
+        // Browser lifecycle
+        window.addEventListener('beforeunload', () => this.cleanup());
+        window.addEventListener('pagehide', () => this.cleanup());
     }
 
     // --------------------------------------------------
-    connect(cameraModel: string): void {
+    connect(cameraModel: UserCameraModel): void {
 
-        if (this.socket?.readyState === WebSocket.OPEN) return;
+        if (this.socket &&
+            (this.socket.readyState === WebSocket.OPEN ||
+                this.socket.readyState === WebSocket.CONNECTING)) {
+            return;
+        }
 
         this.currentCameraModel = cameraModel;
         this.socket = new WebSocket(this.socketUrl);
 
         this.socket.onopen = () => {
-            this.send(cameraModel);
+            this.reconnectAttempts = 0;
+            this.send(this.currentCameraModel);
         };
 
         this.socket.onmessage = (event: MessageEvent) => {
@@ -57,6 +69,10 @@ export class CameraWebSocketService implements OnDestroy {
         };
     }
 
+    private cleanup() {
+        this.disconnect();
+        this.frameSubject.complete();
+    }
     // --------------------------------------------------
     private handleMessage(raw: string): void {
 
@@ -79,20 +95,35 @@ export class CameraWebSocketService implements OnDestroy {
     }
 
     // --------------------------------------------------
-    send(message: any): void {
-        if (this.socket?.readyState === WebSocket.OPEN) {
-            const data = typeof message === 'string' ? message : JSON.stringify(message);
-            this.socket.send(data);
+    send(message: UserCameraModel | undefined): void {
+
+        if (!message) return;
+
+        if (this.socket &&
+            (this.socket.readyState === WebSocket.OPEN ||
+                this.socket.readyState === WebSocket.CONNECTING)) {
+            this.socket.send(JSON.stringify(message));
         }
     }
 
     // --------------------------------------------------
+    private reconnectAttempts = 0;
+    private readonly maxReconnectAttempts = 10;
+
     private scheduleReconnect(): void {
 
         if (!this.currentCameraModel) return;
         if (this.reconnectSub) return;
+        if (this.reconnectAttempts >= this.maxReconnectAttempts) return;
 
-        this.reconnectSub = timer(this.reconnectInterval)
+        const delay = Math.min(
+            this.reconnectInterval * Math.pow(2, this.reconnectAttempts),
+            30000 // max 30s
+        );
+
+        this.reconnectAttempts++;
+
+        this.reconnectSub = timer(delay)
             .subscribe(() => {
                 this.reconnectSub = undefined;
                 this.connect(this.currentCameraModel!);
