@@ -777,6 +777,11 @@
               {
                 "glob": "**/*",
                 "input": "apps/layout-demo/public"
+              },
+              {
+                "glob": "**/*",
+                "input": "apps/layout-demo/src/assets",
+                "output": "assets"
               }
             ],
             "styles": [

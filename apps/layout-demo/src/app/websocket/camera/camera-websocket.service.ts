@@ -1,4 +1,4 @@
-import { Injectable, NgZone, OnDestroy, inject, DestroyRef } from '@angular/core';
+import { Injectable, NgZone, OnDestroy, inject, DestroyRef, signal } from '@angular/core';
 import {
     Subject,
     Observable,
@@ -9,6 +9,8 @@ import {
 import { throttleTime } from 'rxjs/operators';
 import { UserCameraModel } from './user-camera.model';
 import { SocketData } from '../socket.data';
+
+export type CameraConnectionState = 'CONNECTED' | 'RETRYING' | 'FAILED' | 'DISCONNECTED' | 'CONNECTING';
 
 @Injectable({
     providedIn: 'root'
@@ -24,6 +26,10 @@ export class CameraWebSocketService implements OnDestroy {
 
     private frameSubject = new Subject<SocketData>();
     private destroyRef = inject(DestroyRef);
+
+    // UI State
+    public state$ = signal<CameraConnectionState>('DISCONNECTED');
+
     // Max ~30 FPS
     public readonly frame$: Observable<SocketData> =
         this.frameSubject.pipe(
@@ -48,10 +54,12 @@ export class CameraWebSocketService implements OnDestroy {
             return;
         }
 
+        this.state$.set('CONNECTING');
         this.currentCameraModel = cameraModel;
         this.socket = new WebSocket(this.socketUrl);
 
         this.socket.onopen = () => {
+            this.state$.set('CONNECTED');
             this.reconnectAttempts = 0;
             this.send(this.currentCameraModel);
         };
@@ -61,11 +69,15 @@ export class CameraWebSocketService implements OnDestroy {
         };
 
         this.socket.onclose = () => {
-            this.scheduleReconnect();
+            if (this.state$() !== 'DISCONNECTED') {
+                this.scheduleReconnect();
+            }
         };
 
         this.socket.onerror = (err) => {
-            this.scheduleReconnect();
+            if (this.state$() !== 'DISCONNECTED') {
+                this.scheduleReconnect();
+            }
         };
     }
 
@@ -73,6 +85,7 @@ export class CameraWebSocketService implements OnDestroy {
         this.disconnect();
         this.frameSubject.complete();
     }
+
     // --------------------------------------------------
     private handleMessage(raw: string): void {
 
@@ -84,7 +97,6 @@ export class CameraWebSocketService implements OnDestroy {
             return;
         }
 
-        // Backend PascalCase veya farklı isimler kullanıyor olabilir. 
         const data = parsed.data || parsed.Data || parsed.base64 || parsed.Base64;
 
         if (data) {
@@ -114,7 +126,13 @@ export class CameraWebSocketService implements OnDestroy {
 
         if (!this.currentCameraModel) return;
         if (this.reconnectSub) return;
-        if (this.reconnectAttempts >= this.maxReconnectAttempts) return;
+
+        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            this.state$.set('FAILED');
+            return;
+        }
+
+        this.state$.set('RETRYING');
 
         const delay = Math.min(
             this.reconnectInterval * Math.pow(2, this.reconnectAttempts),
@@ -132,7 +150,7 @@ export class CameraWebSocketService implements OnDestroy {
 
     // --------------------------------------------------
     disconnect(): void {
-
+        this.state$.set('DISCONNECTED');
         this.reconnectSub?.unsubscribe();
         this.reconnectSub = undefined;
 
