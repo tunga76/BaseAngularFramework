@@ -1,17 +1,17 @@
 import { Component, ChangeDetectionStrategy, AfterViewInit, OnDestroy, ViewChild, ElementRef, signal, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { CameraWebSocketService } from '../../websocket/camera/camera-websocket.service';
-import { UserCameraModel } from '../../websocket/camera/user-camera.model';
-import { faceDetectionEnums } from '../../features/document/enums/face-detection-status.enum';
 import { FaceDetectionService } from './services/face-detection.service';
+import { faceDetectionEnums } from 'apps/layout-demo/src/app/features/document/enums/face-detection-status.enum';
+import { UserCameraModel } from 'apps/layout-demo/src/app/websocket/camera/user-camera.model';
+import { CameraWebSocketService } from 'apps/layout-demo/src/app/websocket/camera/camera-websocket.service';
 
 @Component({
     selector: 'app-camera-view',
     standalone: true,
     imports: [CommonModule],
-    templateUrl: './camera.component.html',
-    styleUrl: './camera.component.scss',
+    templateUrl: './camera-view.component.html',
+    styleUrl: './camera-view.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CameraViewComponent implements AfterViewInit, OnDestroy {

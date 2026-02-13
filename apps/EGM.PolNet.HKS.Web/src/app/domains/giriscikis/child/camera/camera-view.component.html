@@ -1,0 +1,29 @@
+<div class="camera-view-wrapper">
+    <div class="camera-container">
+
+        <div class="camera-status" [attr.data-state]="state$()">
+            <span class="status-dot"></span>
+            {{ state$() }}
+        </div>
+
+        <img #livecam class="camera-frame" [src]="'assets/images/resimyok.jpg'" alt="Kamera Görüntüsü" />
+
+        <!-- <canvas #cameraCanvas class="camera-canvas"></canvas> -->
+        <canvas #overlayCanvas class="overlay-canvas"></canvas>
+
+    </div>
+
+    <div class="controls-container">
+
+        <button class="cameraicons foto-check-btn" type="button"
+            (click)="addCameraImageToParentItem(FaceDetectionEnums.UserTake)">
+            <img #fotoImg [src]="'assets/images/foto-check.png'" alt="Fotoğraf Çek">
+            <span class="hover-text">Resim Çek</span>
+        </button>
+        <button class="cameraicons refresh-btn" type="button" (click)="restartDetection()">
+            <img [src]="'assets/images/refresh.png'" alt="Yeniden Başlat">
+            <span class="hover-text">Yüz Tanıma Yeniden Başlat</span>
+        </button>
+
+    </div>
+</div>

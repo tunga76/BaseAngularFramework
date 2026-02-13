@@ -1,5 +1,5 @@
-@import 'tokens';
-@import 'spacing';
-@import 'elevation';
-@import 'typography';
-@import 'utilities';
+@forward 'tokens';
+@forward 'spacing';
+@forward 'elevation';
+@forward 'typography';
+@forward 'utilities';

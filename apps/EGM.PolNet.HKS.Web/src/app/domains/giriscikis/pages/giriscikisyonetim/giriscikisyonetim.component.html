@@ -1,0 +1,189 @@
+<div class="giris-cikis-container">
+    <header class="page-header">
+        <h1>Giriş-Çıkış Yönetimi</h1>
+        <p>Sistem giriş ve çıkış kayıtlarını buradan yönetebilirsiniz.</p>
+    </header>
+
+    <div class="three-column-grid">
+        <!-- Column 1: Summary/Identity -->
+        <section class="column column-stats">
+            <div class="card premium-card">
+                <div class="card-header">
+                    <span class="material-icons">info</span>
+                    <h3>Özet Bilgiler</h3>
+                </div>
+
+                <div class="identity-badge my-4 text-center">
+                    <img id="faceDetectedImageId" class="identity-photo" [src]="documentImage" alt="Tespit Edilen Yüz">
+                    <div class="identity-info mt-3">
+                        <span class="badge status-badge">AKTİF KAYIT</span>
+                    </div>
+                </div>
+
+                <div class="info-grid mt-4">
+                    <div class="info-item">
+                        <label class="text-xs text-secondary">Belge Resim</label>
+                        <img id="belgeresim" [src]="documentImage" alt="Pasaport Fotoğrafı" class="doc-preview">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Column 2: Main Entry Form -->
+        <section class="column column-main">
+            <div class="card">
+                <div class="card-header">
+                    <span class="material-icons">edit_note</span>
+                    <h3>Kayıt Detayları</h3>
+                </div>
+
+                <div class="form-wrapper">
+                    <form [formGroup]="frm" (ngSubmit)="onSubmit()">
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <app-form-field label="Belge Seri No" controlName="SeriNo">
+                                <input type="text" formControlName="SeriNo" placeholder="Örn: TR-123456" />
+                            </app-form-field>
+
+                            <app-form-field label="Kimlik No" controlName="KimlikNo">
+                                <input type="text" formControlName="KimlikNo" placeholder="T.C. Kimlik No" />
+                            </app-form-field>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <app-form-field label="Adı" controlName="Ad">
+                                <input type="text" formControlName="Ad" placeholder="Kişinin Adı" />
+                            </app-form-field>
+
+                            <app-form-field label="Soyadı" controlName="Soyad">
+                                <input type="text" formControlName="Soyad" placeholder="Kişinin Soyadı" />
+                            </app-form-field>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <app-form-field label="Ülke" controlName="Ulke">
+                                <select formControlName="Ulke">
+                                    <option value="TUR">Türkiye</option>
+                                    <option value="DEU">Almanya</option>
+                                    <option value="GBR">İngiltere</option>
+                                    <option value="USA">ABD</option>
+                                </select>
+                            </app-form-field>
+
+                            <app-form-field label="Cinsiyet" controlName="Cinsiyet">
+                                <select formControlName="Cinsiyet">
+                                    <option value="E">Erkek</option>
+                                    <option value="K">Kadın</option>
+                                </select>
+                            </app-form-field>
+                        </div>
+
+                        <app-form-field label="Doğum Tarihi" controlName="DogumTarihi">
+                            <input type="date" formControlName="DogumTarihi" />
+                        </app-form-field>
+
+                        <div class="form-actions mt-4 flex gap-2">
+                            <button type="button" (click)="clearForm()" class="action-btn outline w-1/3">
+                                <span class="material-icons me-1">clear</span>
+                                Temizle
+                            </button>
+                            <button type="submit" [disabled]="formState()?.submitting"
+                                class="action-btn primary flex-1">
+                                <span *ngIf="formState()?.submitting"
+                                    class="spinner-border spinner-border-sm me-2"></span>
+                                {{ formState()?.submitting ? 'Gönderiliyor...' : 'Kaydet / Test Et' }}
+                            </button>
+                        </div>
+
+                        <div *ngIf="formState()?.error" class="alert alert-danger mt-3">
+                            <span class="material-icons me-2">error</span>
+                            {{ formState()?.error }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-6">
+                <div class="card-header">
+                    <span class="material-icons">history</span>
+                    <h3>Son Kayıtlar</h3>
+                </div>
+
+                <platform-table [bordered]="true">
+                    <thead>
+                        <tr>
+                            <th>Ad Soyad</th>
+                            <th>Belge / Kimlik No</th>
+                            <th>Ülke</th>
+                            <th>İşlem Tarihi</th>
+                            <th>Tür</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let t of transactions()">
+                            <td>
+                                <strong>{{ t.ad }} {{ t.soyad }}</strong>
+                                <div class="text-xs text-secondary">{{ t.cinsiyet === 'E' ? 'Erkek' : 'Kadın' }}</div>
+                            </td>
+                            <td>
+                                <div>{{ t.seriNo }}</div>
+                                <div class="text-xs text-secondary">{{ t.kimlikNo }}</div>
+                            </td>
+                            <td>{{ t.ulke }}</td>
+                            <td>{{ t.islemTarihi | date:'dd.MM.yyyy HH:mm' }}</td>
+                            <td>
+                                <span class="badge"
+                                    [ngClass]="t.islemTuru === 'Giris' ? 'bg-success-light' : 'bg-warning-light'">
+                                    {{ t.islemTuru }}
+                                </span>
+                            </td>
+                            <td>
+                                <button (click)="deleteTransaction(t.id)" class="btn-icon text-danger" title="Sil">
+                                    <span class="material-icons">delete</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr *ngIf="transactions().length === 0">
+                            <td colspan="6" class="text-center py-6 text-secondary">
+                                Kayıt bulunamadı.
+                            </td>
+                        </tr>
+                    </tbody>
+                </platform-table>
+            </div>
+        </section>
+
+        <!-- Column 3: Actions & Status -->
+        <section class="column column-actions">
+            <div class="card action-card">
+                <div class="card-header">
+                    <span class="material-icons">bolt</span>
+                    <h3>Hızlı İşlemler</h3>
+                </div>
+
+                <div class="action-list">
+                    <button class="action-btn primary flex items-center justify-center gap-2">
+                        <span class="material-icons">person_add</span>
+                        Yeni Giriş Kaydı
+                    </button>
+                    <button class="action-btn outline flex items-center justify-center gap-2">
+                        <span class="material-icons">description</span>
+                        Rapor Oluştur
+                    </button>
+                </div>
+
+                <div class="status-box mt-4">
+                    <div class="status-header">
+                        <span class="material-icons">memory</span>
+                        Sistem Durumu
+                    </div>
+                    <div class="status-indicator online mt-2">
+                        <span class="pulse"></span>
+                        SİSTEM ÇALIŞIYOR
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>

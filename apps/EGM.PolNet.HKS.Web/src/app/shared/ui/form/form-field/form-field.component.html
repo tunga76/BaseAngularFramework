@@ -1,0 +1,35 @@
+<div class="form-group flex items-center">
+
+    <!-- Label -->
+    <label class="form-label" style="flex: 0 0 150px; margin-bottom: 0;">
+        {{ label }}
+        <span *ngIf="isRequired" class="text-danger">*</span>
+    </label>
+
+    <!-- Control -->
+    <div class="flex-grow-1 position-relative" style="min-width: 0;">
+
+        <ng-content></ng-content>
+
+        <span *ngIf="showSuccess" class="material-icons text-success position-absolute top-50 translate-middle-y"
+            style="font-size: 1.25rem; pointer-events: none; right: 0.75rem;">
+            check
+        </span>
+
+        <!-- Pending Spinner -->
+        <div *ngIf="showPending" class="position-absolute top-50 end-0 translate-middle-y me-2">
+            <div class="spinner-border spinner-border-sm text-warning"></div>
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="showError" class="invalid-feedback d-block">
+            {{ errorMessage }}
+        </div>
+
+        <!-- Hint -->
+        <div *ngIf="hint && !showError" class="form-text">
+            {{ hint }}
+        </div>
+
+    </div>
+</div>

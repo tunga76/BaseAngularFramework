@@ -23,6 +23,8 @@
     "@angular/platform-browser-dynamic": "^19.1.0",
     "@angular/router": "^19.1.0",
     "@mediapipe/tasks-vision": "^0.10.32",
+    "@ngrx/operators": "^19.2.1",
+    "@ngrx/signals": "^19.2.1",
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0",
     "ngx-spinner": "^19.0.0",
